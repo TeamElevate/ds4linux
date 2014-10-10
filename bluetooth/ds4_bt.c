@@ -7,7 +7,9 @@
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 
-int get_bd_addr(char* addr, int len) {
+#include "ds4_bt.h"
+
+int get_bd_addr(char* addr) {
   int dev_id, dd;
 
   dev_id = hci_get_route(NULL);
@@ -15,7 +17,6 @@ int get_bd_addr(char* addr, int len) {
   dd = hci_open_dev( dev_id );
   assert(dd >= 0);
 
-  assert(len >= 19);
   bdaddr_t my_addr;
   hci_read_bd_addr(dd, &my_addr, 0);
   ba2str(&my_addr, addr);
