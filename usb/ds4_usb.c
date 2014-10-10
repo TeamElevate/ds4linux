@@ -117,8 +117,7 @@ int ds4_usb_deinit(ds4_usb_t* ds4) {
 
 int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac) {
   unsigned char msg[23];
-  int mac_bytes[6];
-  assert(strlen((char*)mac) == 6);
+  unsigned mac_bytes[6];
   int r;
 
   msg[0] = 0x13;
@@ -136,12 +135,12 @@ int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac) {
 
   assert(r == 6);
 
-  msg[1] = (unsigned char)mac[5];
-  msg[2] = (unsigned char)mac[4];
-  msg[3] = (unsigned char)mac[3];
-  msg[4] = (unsigned char)mac[2];
-  msg[5] = (unsigned char)mac[1];
-  msg[6] = (unsigned char)mac[0];
+  msg[1] = (unsigned char)mac_bytes[5];
+  msg[2] = (unsigned char)mac_bytes[4];
+  msg[3] = (unsigned char)mac_bytes[3];
+  msg[4] = (unsigned char)mac_bytes[2];
+  msg[5] = (unsigned char)mac_bytes[1];
+  msg[6] = (unsigned char)mac_bytes[0];
   msg[7]  = 0x56;
   msg[8]  = 0xE8;
   msg[9]  = 0x81;

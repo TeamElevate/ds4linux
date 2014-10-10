@@ -12,7 +12,6 @@ int main() {
   int r;
   unsigned char addr[20];
   ds4_usb_t ds4_usb;
-  get_bd_addr((char*)addr);
 
   r = ds4_usb_init(&ds4_usb);
   if (r <= 0) {
@@ -24,6 +23,11 @@ int main() {
 
   ds4_usb_get_mac(&ds4_usb, addr);
   printf("Current MAC: %s\n", addr);
+  get_bd_addr((char*)addr);
+  printf("My MAC: %s\n", addr);
+  ds4_usb_set_mac(&ds4_usb, addr);
+  ds4_usb_get_mac(&ds4_usb, addr);
+  printf("New MAC: %s\n", addr);
 
   ds4_usb_deinit(&ds4_usb);
 
