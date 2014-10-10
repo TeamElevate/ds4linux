@@ -11,6 +11,7 @@
 
 int get_bd_addr(char* addr) {
   int dev_id, dd;
+  int r;
 
   dev_id = hci_get_route(NULL);
   assert(dev_id >= 0);
@@ -18,7 +19,8 @@ int get_bd_addr(char* addr) {
   assert(dd >= 0);
 
   bdaddr_t my_addr;
-  hci_read_bd_addr(dd, &my_addr, 0);
+  r = hci_read_bd_addr(dd, &my_addr, 0);
+  assert(r == 0);
   ba2str(&my_addr, addr);
 
   close(dd);
