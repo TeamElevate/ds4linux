@@ -6,6 +6,7 @@
 
 #include <ds4_usb.h>
 #include <ds4_bt.h>
+#include <ds4.h>
 
 void print_usage() {
   printf("ds4_connect\n");
@@ -14,6 +15,9 @@ void print_usage() {
 int main(int argc, char** argv) {
   int num_found = 0;
   ds4_bt_t device;
+  unsigned char data[11];
+  controls_t* controls;
+  
 
   // Scan
   num_found = scan_for_ds4(&device);
@@ -27,7 +31,9 @@ int main(int argc, char** argv) {
 
   // read data
   while (1) {
-    read_from_ds4(&device);
+    read_from_ds4(&device, data, sizeof(data));
+    controls = (controls_t*)(data + 2);
+    printf("X: %1d Circle: %1d Triangle: %1d Square: %1d\n", controls->x, controls->circle, controls->triangle, controls->square);
     usleep(5000);
   }
 

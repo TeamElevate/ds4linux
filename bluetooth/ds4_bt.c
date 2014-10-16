@@ -116,18 +116,10 @@ int connect_to_ds4(ds4_bt_t* device) {
   return 0;
 }
 
-int read_from_ds4(ds4_bt_t* device) {
-  unsigned char data[REPORT_SIZE];
+int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len) {
   int bytes_read;
 
-  bytes_read = read(device->int_socket, data, sizeof(data));
+  bytes_read = read(device->int_socket, buf, len);
 
-  if (bytes_read == sizeof(data)) {
-    if ( (data[6] & 32) ) {
-      printf("X Pressed\n");
-    }
-  }
-
-
-  return 0;
+  return bytes_read;
 }
