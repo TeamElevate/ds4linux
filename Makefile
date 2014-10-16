@@ -6,6 +6,9 @@ LDFLAGS =
 BLUETOOTH_DIR = bluetooth
 USB_DIR       = usb
 TOOLS_DIR     = tools
+TOOLS         = $(TOOLS_DIR)/ds4_sync.c $(TOOLS_DIR)/ds4_conn.c
+TOOL_OBJS     = $(TOOLS:.c=.o)
+TOOL_EXES     = $(basename $(TOOLS))
 
 all: bluetooth usb tools
 
@@ -19,14 +22,16 @@ usb: $(USB_DIR)/ds4_usb.o
 $(USB_DIR)/ds4_usb.o: $(USB_DIR)/ds4_usb.c
 	$(CC) $(CFLAGS) $(shell pkg-config libusb-1.0 --cflags) -o $@ $^
 
-tools: $(TOOLS_DIR)/ds4_sync.o $(BLUETOOTH_DIR)/ds4_bt.o $(USB_DIR)/ds4_usb.o
-	$(CC) $(LDFLAGS) -o $(TOOLS_DIR)/ds4_sync $^ -lusb-1.0 -lbluetooth
+tools: $(TOOL_EXES)
 
-$(TOOLS_DIR)/ds4_sync.o: $(TOOLS_DIR)/ds4_sync.c
-	$(CC) $(CFLAGS) $(shell pkg-config libusb-1.0 --cflags) -I$(BLUETOOTH_DIR)/ -I$(USB_DIR)/ -o $@ $^ 
+$(TOOL_EXES): %: %.o $(USB_DIR)/ds4_usb.o $(BLUETOOTH_DIR)/ds4_bt.o
+	$(CC) $(LDFLAGS) -o $@ $^ $(shell pkg-config libusb-1.0 --libs) $(shell pkg-config bluez --libs)
+
+$(TOOL_OBJS): %.o: %.c
+	$(CC) $(CFLAGS) $(shell pkg-config libusb-1.0 --cflags) -I$(BLUETOOTH_DIR)/ -I$(USB_DIR)/ -o $@ $<
 
 clean:
-	rm -f $(TOOLS_DIR)/ds4_sync
-	rm -f $(TOOLS_DIR)/*.o
+	rm -f $(TOOL_EXES)
+	rm -f $(TOOL_OBJS)
 	rm -f $(BLUETOOTH_DIR)/*.o
 	rm -f $(USB_DIR)/*.o

@@ -115,10 +115,11 @@ int ds4_usb_deinit(ds4_usb_t* ds4) {
   return 0;
 }
 
-int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac) {
+int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac, const uint8_t* key) {
   unsigned char msg[23];
   unsigned mac_bytes[6];
   int r;
+  int i;
 
   msg[0] = 0x13;
 
@@ -141,22 +142,10 @@ int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac) {
   msg[4] = (unsigned char)mac_bytes[2];
   msg[5] = (unsigned char)mac_bytes[1];
   msg[6] = (unsigned char)mac_bytes[0];
-  msg[7]  = 0x56;
-  msg[8]  = 0xE8;
-  msg[9]  = 0x81;
-  msg[10] = 0x38;
-  msg[11] = 0x08;
-  msg[12] = 0x06;
-  msg[13] = 0x51;
-  msg[14] = 0x41;
-  msg[15] = 0xC0;
-  msg[16] = 0x7F;
-  msg[17] = 0x12;
-  msg[18] = 0xAA;
-  msg[19] = 0xD9;
-  msg[20] = 0x66;
-  msg[21] = 0x3C;
-  msg[22] = 0xCE;
+
+  for (i = 15; i >= 0; i--) {
+    msg[(15-i) + 7] = key[i];
+  }
 
   r = libusb_control_transfer(
     ds4_usb->devh,

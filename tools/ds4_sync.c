@@ -13,6 +13,25 @@ void print_usage() {
   printf("If no mac_addr given, this computers bluetooth adapter's MAC is used\n");
 }
 
+uint8_t key[16] = {
+  0x56,
+  0xE8,
+  0x81,
+  0x38,
+  0x08,
+  0x06,
+  0x51,
+  0x41,
+  0xC0,
+  0x7F,
+  0x12,
+  0xAA,
+  0xD9,
+  0x66,
+  0x3C,
+  0xCE
+};
+
 int main(int argc, char** argv) {
   int r;
   unsigned char ds4_addr[18];
@@ -37,7 +56,7 @@ int main(int argc, char** argv) {
     get_bd_addr((char*)addr);
   }
   printf("My MAC: %s\n", addr);
-  ds4_usb_set_mac(&ds4_usb, addr);
+  ds4_usb_set_mac(&ds4_usb, addr, key);
   ds4_usb_get_mac(&ds4_usb, addr);
   printf("New MAC: %s\n", addr);
 
