@@ -25,7 +25,8 @@ static void process_ds4(struct libusb_device* ds4_dev, int infnum, ds4_usb_t* ds
   r = libusb_open(ds4_dev, &devh);
   assert(r == 0);
 
-  r = libusb_set_auto_detach_kernel_driver(devh, 1);
+  //r = libusb_set_auto_detach_kernel_driver(devh, infnum);
+  r = libusb_detach_kernel_driver(devh, infnum);
   assert(r == 0);
 
   r = libusb_claim_interface(devh, infnum);
@@ -88,12 +89,18 @@ int ds4_usb_init(ds4_usb_t* ds4) {
 
   ds4->devh = NULL;
   ret = libusb_init(&ctx);
-  assert(ret == 0);
+  if (ret < 0) {
+    printf("LIBUSB INIT ERROR(%d): %s\n", ret, libusb_error_name( (enum libusb_error)ret ));
+    return ret;
+  }
 
   libusb_set_debug(ctx, 3);
 
   cnt = libusb_get_device_list(ctx, &devs);
-  assert(cnt >= 0);
+  if (cnt < 0) {
+    printf("LIBUSB GET DEVICE ERROR(%d): %s\n", ret, libusb_error_name( (enum libusb_error)ret ));
+    return cnt;
+  }
 
   for (i = 0; i < cnt; i++) {
     found += iter_dev(devs[i], ds4);
@@ -108,6 +115,7 @@ int ds4_usb_deinit(ds4_usb_t* ds4) {
   assert(ctx != NULL);
   r = libusb_release_interface(ds4->devh, ds4->infnum);
   assert(r == 0);
+  r = libusb_attach_kernel_driver(ds4->devh, ds4->infnum);
   libusb_close(ds4->devh);
   libusb_free_device_list(devs, 1);
   libusb_exit(ctx);
