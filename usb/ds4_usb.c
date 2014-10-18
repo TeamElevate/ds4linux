@@ -7,6 +7,10 @@
 static const int DS4_VENDOR_ID  = 0x054C;
 static const int DS4_PRODUCT_ID = 0x05C4;
 
+static const int HID_GET_REPORT = 0x01;
+static const int HID_SET_REPORT = 0x09;
+static const int HID_REPORT_TYPE_FEATURE = 0x03;
+
 
 static int is_a_ds4(const struct libusb_device_descriptor* desc) {
   if (desc->idVendor != DS4_VENDOR_ID) {
@@ -158,8 +162,8 @@ int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac, const uint8_t*
   r = libusb_control_transfer(
     ds4_usb->devh,
     LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
-    0x09,
-    0x0313,
+    HID_SET_REPORT,
+    (HID_REPORT_TYPE_FEATURE << 8) | 0x13,
     ds4_usb->infnum,
     msg,
     sizeof(msg),
@@ -170,14 +174,15 @@ int ds4_usb_set_mac(ds4_usb_t* ds4_usb, const unsigned char* mac, const uint8_t*
   return 0;
 }
 
-int ds4_usb_get_mac(ds4_usb_t* ds4_usb, unsigned char* mac) {
+int ds4_usb_get_mac(ds4_usb_t* ds4_usb, unsigned char* ds4_mac, unsigned char* mac) {
   unsigned char msg[16];
   int r;
+
   r = libusb_control_transfer(
     ds4_usb->devh,
     LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
-    0x01,
-    0x0312,
+    HID_GET_REPORT,
+    (HID_REPORT_TYPE_FEATURE << 8) | 0x12,
     ds4_usb->infnum,
     msg,
     sizeof(msg),
@@ -185,6 +190,9 @@ int ds4_usb_get_mac(ds4_usb_t* ds4_usb, unsigned char* mac) {
   );
 
   assert(r == sizeof(msg));
+
+  r = sprintf((char*)ds4_mac, "%02x:%02x:%02x:%02x:%02x:%02x", msg[6], msg[5], msg[4], msg[3], msg[2], msg[1]);
+  assert(r == 17);
 
   r = sprintf((char*)mac, "%02x:%02x:%02x:%02x:%02x:%02x", msg[15], msg[14], msg[13], msg[12], msg[11], msg[10]);
   assert(r == 17);

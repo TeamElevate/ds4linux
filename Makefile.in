@@ -1,4 +1,4 @@
-CC = gcc 
+CC = @CC@
 
 CFLAGS = -Wall -c -g
 LDFLAGS =

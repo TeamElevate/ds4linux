@@ -35,7 +35,7 @@ uint8_t key[16] = {
 int main(int argc, char** argv) {
   int r;
   unsigned char ds4_addr[18];
-  unsigned char bd_addr[18];
+  unsigned char host_addr[18];
   unsigned char* addr = NULL;
   ds4_usb_t ds4_usb;
 
@@ -47,18 +47,21 @@ int main(int argc, char** argv) {
 
   assert(ds4_usb.devh);
 
-  ds4_usb_get_mac(&ds4_usb, ds4_addr);
-  printf("Current MAC: %s\n", ds4_addr);
+  ds4_usb_get_mac(&ds4_usb, ds4_addr, host_addr);
+  printf("Current MAC: %s\n", host_addr);
+  printf("DS4 MAC: %s\n", ds4_addr);
   if (argc > 1) {
     addr = (unsigned char*)argv[1];
   } else {
-    addr = bd_addr;
+    addr = host_addr;
     get_bd_addr((char*)addr);
   }
-  printf("My MAC: %s\n", addr);
+  printf("Host MAC: %s\n", addr);
   ds4_usb_set_mac(&ds4_usb, addr, key);
-  ds4_usb_get_mac(&ds4_usb, addr);
-  printf("New MAC: %s\n", addr);
+  // Set key
+  set_bd_key((char*)ds4_addr, key);
+  ds4_usb_get_mac(&ds4_usb, ds4_addr, host_addr);
+  printf("New MAC: %s\n", host_addr);
 
   ds4_usb_deinit(&ds4_usb);
 
