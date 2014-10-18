@@ -6,12 +6,18 @@ LDFLAGS =
 BLUETOOTH_DIR  = bluetooth
 USB_DIR        = usb
 CONTROLLER_DIR = controller
+SPI_DIR        = spi
 TOOLS_DIR      = tools
 TOOLS          = $(TOOLS_DIR)/ds4_sync.c $(TOOLS_DIR)/ds4_conn.c
 TOOL_OBJS      = $(TOOLS:.c=.o)
 TOOL_EXES      = $(basename $(TOOLS))
 
-all: bluetooth usb tools
+all: bluetooth usb tools spi
+
+spi: $(SPI_DIR)/spi_test
+
+$(SPI_DIR)/spi_test: $(SPI_DIR)/spidev_test.c
+	$(CC) -I/opt/poky-edison/1.6/sysroots/core2-32-poky-linux/usr/include -Wall -o $@ $^
 
 bluetooth: $(BLUETOOTH_DIR)/ds4_bt.o
 
