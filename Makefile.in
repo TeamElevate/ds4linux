@@ -2,6 +2,7 @@ CC = @CC@
 
 CFLAGS = -Wall -c -g
 LDFLAGS =
+LIBS = @LIBS@
 
 BLUETOOTH_DIR  = bluetooth
 USB_DIR        = usb
@@ -32,7 +33,7 @@ $(USB_DIR)/ds4_usb.o: $(USB_DIR)/ds4_usb.c
 tools: $(TOOL_EXES)
 
 $(TOOL_EXES): %: %.o $(USB_DIR)/ds4_usb.o $(BLUETOOTH_DIR)/ds4_bt.o
-	$(CC) $(LDFLAGS) -o $@ $^ $(shell pkg-config libusb-1.0 --libs) $(shell pkg-config bluez --libs)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 $(TOOL_OBJS): %.o: %.c
 	$(CC) $(CFLAGS) $(shell pkg-config libusb-1.0 --cflags) -I$(CONTROLLER_DIR)/ -I$(BLUETOOTH_DIR)/ -I$(USB_DIR)/ -o $@ $<

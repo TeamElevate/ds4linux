@@ -11,6 +11,7 @@ AC_CHECK_LIB([bluetooth], [hci_open_dev])
 AC_CHECK_LIB([usb-1.0], [libusb_open])
 
 # Checks for header files.
+AC_HEADER_ASSERT
 AC_CHECK_HEADERS([inttypes.h stdlib.h string.h sys/socket.h unistd.h])
 AC_CHECK_HEADERS([assert.h stdio.h  stdlib.h])
 AC_CHECK_HEADERS([bluetooth/bluetooth.h libusb-1.0/libusb.h])
