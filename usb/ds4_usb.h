@@ -1,7 +1,7 @@
 #ifndef __DS4_USB__
 #define __DS4_USB__
 
-#include <libusb.h>
+#include <libusb-1.0/libusb.h>
 
 struct _ds4_usb {
   // @TODO: Add linked list of controllers later

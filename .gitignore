@@ -1,6 +1,16 @@
 # Produced by autoconf
-configure
-config.log
-config.status
-autom4te.cache/
-Makefile
+/configure
+/autom4te.cache/
+/Makefile
+/Makefile.in
+/aclocal.m4
+/config.*
+/compile
+/missing
+/depcomp
+/install-sh
+/m4/
+/stamp-h?
+.deps/
+.dirstamp/
+*.o
