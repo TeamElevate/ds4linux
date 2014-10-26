@@ -12,5 +12,7 @@
 /m4/
 /stamp-h?
 .deps/
-.dirstamp/
+bluetooth/.dirstamp
+tools/.dirstamp
+usb/.dirstamp
 *.o
