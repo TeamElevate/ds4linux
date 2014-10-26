@@ -8,6 +8,13 @@
 /m4/
 /stamp-h?
 .deps/
+COPYING
+INSTALL
+compile
+depcomp
+install-sh
+missing
+
 bluetooth/.dirstamp
 tools/.dirstamp
 usb/.dirstamp
