@@ -1,6 +1,6 @@
 #ifndef __DS4_CONTROLLER__
 #define __DS4_CONTROLLER__
-struct _controls {
+typedef struct {
   // byte 0
   int left_analog_x  : 8;
 
@@ -17,7 +17,7 @@ struct _controls {
   unsigned dpad           : 3;
   unsigned _unknown       : 1;
   unsigned square         : 1;
-  unsigned x              : 1;
+  unsigned cross          : 1;
   unsigned circle         : 1;
   unsigned triangle       : 1;
 
@@ -41,7 +41,6 @@ struct _controls {
 
   // byte 8 
   unsigned r2_analog      : 8;
-};
+} ds4_controls_t;
 
-typedef struct _controls controls_t;
 #endif

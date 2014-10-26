@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -109,7 +110,10 @@ int connect_to_ds4(ds4_bt_t* device) {
   bacpy(&int_addr.l2_bdaddr, &device->addr);
 
   ret = connect(device->ctl_socket, (struct sockaddr *)&ctl_addr, sizeof(ctl_addr));
-  assert(ret == 0);
+  if (ret != 0) {
+    printf("Error in creating socket: %s\n", strerror(errno));
+    return ret;
+  }
   ret = connect(device->int_socket, (struct sockaddr *)&int_addr, sizeof(int_addr));
   assert(ret == 0);
 

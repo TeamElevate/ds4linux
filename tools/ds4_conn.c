@@ -14,9 +14,10 @@ void print_usage() {
 
 int main(int argc, char** argv) {
   int num_found = 0;
+  int ret;
   ds4_bt_t device;
   unsigned char data[11];
-  controls_t* controls;
+  ds4_controls_t* controls;
   
 
   // Scan
@@ -27,13 +28,21 @@ int main(int argc, char** argv) {
   }
 
   // Connect
-  connect_to_ds4(&device);
+  ret = connect_to_ds4(&device);
+  if (ret != 0) {
+    printf("Error Connecting to DS4 controller\n");
+    return -2;
+  }
 
   // read data
   while (1) {
     read_from_ds4(&device, data, sizeof(data));
-    controls = (controls_t*)(data + 2);
-    printf("X: %1d Circle: %1d Triangle: %1d Square: %1d\n", controls->x, controls->circle, controls->triangle, controls->square);
+    controls = (ds4_controls_t*)(data + 2);
+    printf("Left X: %d Left Y: %d Right X: %d Right Y: %d\n",
+            controls->left_analog_x,
+            controls->left_analog_y,
+            controls->right_analog_x,
+            controls->right_analog_y);
     usleep(5000);
   }
 
