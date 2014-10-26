@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([ds4drv], [0.1], [schultetwin1@gmail.com])
+AC_INIT([ds4linux], [0.1], [schultetwin1@gmail.com])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])

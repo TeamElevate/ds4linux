@@ -2,16 +2,16 @@
 #define __DS4_CONTROLLER__
 typedef struct {
   // byte 0
-  int left_analog_x  : 8;
+  unsigned left_analog_x  : 8;
 
   // byte 1
-  int left_analog_y  : 8;
+  unsigned left_analog_y  : 8;
 
   // byte 2
-  int right_analog_x : 8;
+  unsigned right_analog_x : 8;
 
   // byte 3
-  int right_analog_y : 8;
+  unsigned right_analog_y : 8;
 
   // byte 4
   unsigned dpad           : 3;
