@@ -5,10 +5,6 @@
 /Makefile.in
 /aclocal.m4
 /config.*
-/compile
-/missing
-/depcomp
-/install-sh
 /m4/
 /stamp-h?
 .deps/
