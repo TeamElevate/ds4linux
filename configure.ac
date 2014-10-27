@@ -3,6 +3,8 @@
 AC_PREREQ([2.69])
 AC_INIT([ds4linux], [0.1], [schultetwin1@gmail.com])
 
+PKG_PROG_PKG_CONFIG
+
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 
@@ -10,8 +12,16 @@ AM_SILENT_RULES([yes])
 AC_PROG_CC
 
 # Checks for libraries.
+PKG_CHECK_MODULES([LIBUSB], [libusb-1.0], [have_libusb=yes], [have_libusb=no])
+AM_CONDITIONAL([LIBUSB], [test "$have_libusb" = "yes"])
+
+PKG_CHECK_MODULES([BLUEZ], [bluez], [have_bluez=yes], [have_bluez=no])
+AM_CONDITIONAL([BLUEZ], [test "$have_bluez" = "yes"])
+
 AC_CHECK_LIB([bluetooth], [hci_open_dev])
-AC_CHECK_LIB([usb-1.0], [libusb_open])
+
+PKG_CHECK_MODULES([MRAA], [mraa], [have_mraa=yes], [have_mraa=no])
+AM_CONDITIONAL([MRAA], [test "$have_mraa" = "yes"])
 
 # Checks for header files.
 AC_HEADER_ASSERT

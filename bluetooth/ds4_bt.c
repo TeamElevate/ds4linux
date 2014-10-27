@@ -124,6 +124,12 @@ int connect_to_ds4(ds4_bt_t* device) {
   return 0;
 }
 
+int disconnect_from_ds4(ds4_bt_t* device) {
+  close(device->ctl_socket);
+  close(device->int_socket);
+  return 0;
+}
+
 int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len) {
   int bytes_read;
 
