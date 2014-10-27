@@ -41,6 +41,34 @@ typedef struct {
 
   // byte 8 
   unsigned r2_analog      : 8;
+
+  // byte 9 - 10
+  unsigned counter        : 16;
+
+  // byte 11
+  unsigned battery        : 8;
+
+
+  // byte 12 - 13
+  int roll      : 16;
+
+  // byte 14 - 15
+  int pitch     : 16;
+
+  // byte 16 - 17
+  int yaw       : 16;
+
+  // byte 18 - 19
+  int accel_x        : 16;
+
+  // byte 20 - 21
+  int accel_y        : 16;
+
+  // byte 22 - 23
+  int accel_z        : 16;
+
+  // The reset is  trackpad data... later
+
 } ds4_controls_t;
 
 #endif

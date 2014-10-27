@@ -21,5 +21,6 @@ int scan_for_ds4(ds4_bt_t* device);
 int connect_to_ds4(ds4_bt_t* device);
 int disconnect_from_ds4(ds4_bt_t* device);
 int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len);
+int control_ds4(ds4_bt_t* device, unsigned char* buf, size_t len);
 
 #endif

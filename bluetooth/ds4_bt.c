@@ -14,6 +14,9 @@
 #define L2CAP_PSM_HIDP_CTRL 0x11
 #define L2CAP_PSM_HIDP_INTR 0x13
 
+#define HIDP_TRANS_SET_REPORT  0x50
+#define HIDP_DATA_RTYPE_OUTPUT 0x02
+
 #define REPORT_ID           0x11
 #define REPORT_SIZE           11
 
@@ -136,4 +139,26 @@ int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len) {
   bytes_read = read(device->int_socket, buf, len);
 
   return bytes_read;
+}
+
+int control_ds4(ds4_bt_t* device, unsigned char* buffer, size_t len) {
+  int bytes_written;
+  unsigned char buf[79];
+  buf[0] = HIDP_TRANS_SET_REPORT | HIDP_DATA_RTYPE_OUTPUT;
+  buf[1] = 0x11; /* report id */
+  buf[2] = 128;
+  buf[4] = 255;
+
+  buf[7] = 0; /* right rumble */
+  buf[8] = 0;   /* left rumble */
+
+  buf[9]  = 0; // r
+  buf[10] = 0; // g
+  buf[11] = 0; // b
+
+  buf[12] = 255; // time to flash bright
+  buf[13] = 255; // time to flash dark
+
+  bytes_written = write(device->ctl_socket, buf, sizeof(buf));
+  return bytes_written;
 }
