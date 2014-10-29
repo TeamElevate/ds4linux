@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   uint8_t buffer[2048];
 
   mraa_i2c_context i2c;
-  i2c = mraa_i2c_init(0);
+  i2c = mraa_i2c_init(6);
   mraa_i2c_address(i2c, 0);
   
 
