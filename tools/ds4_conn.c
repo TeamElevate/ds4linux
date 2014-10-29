@@ -1,12 +1,19 @@
 // This will connect to a linux DS4
 
 #include <assert.h>
+#include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
 
 #include <ds4_usb.h>
 #include <ds4_bt.h>
 #include <ds4.h>
+
+static int keep_running = 1;
+
+void intHandler(int dummy) {
+  keep_running = 0;
+}
 
 void print_usage() {
   printf("ds4_connect\n");
@@ -19,6 +26,7 @@ int main(int argc, char** argv) {
   ds4_bt_t device;
   unsigned char data[79];
   ds4_controls_t* controls;
+  int remote_disconnect = 0;
   
 
   // Scan
@@ -39,12 +47,14 @@ int main(int argc, char** argv) {
   ret = control_ds4(&device, NULL, 0);
 
   // read data
+  signal(SIGINT, intHandler);
   while (1) {
     bytes_read = read_from_ds4(&device, data, sizeof(data));
     if (bytes_read == 0) {
       // Connection closed
       disconnect_from_ds4(&device);
       printf("Controller disconnected\n");
+      remote_disconnect = 1;
       break;
     } else if (bytes_read != 79) {
       continue;
@@ -58,6 +68,10 @@ int main(int argc, char** argv) {
             controls->pitch,
             controls->yaw
           );
+  }
+  signal(SIGINT, SIG_DFL);
+  if (!remote_disconnect) {
+    disconnect_from_ds4(&device);
   }
 
   return 0;
