@@ -83,6 +83,7 @@ int scan_for_ds4(ds4_bt_t* device) {
   num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
   assert(num_rsp >= 0);
 
+  // @TODO: There has to be a better way of finding the device
   for (i = 0; i < num_rsp; i++) {
     if (hci_read_remote_name(dd, &(ii+i)->bdaddr, sizeof(name), name, 0) >= 0) {
       if (strcmp("Wireless Controller", name) == 0) {
@@ -141,6 +142,7 @@ int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len) {
   return bytes_read;
 }
 
+// @TODO: Update this to work much better
 int control_ds4(ds4_bt_t* device, unsigned char* buffer, size_t len) {
   int bytes_written;
   unsigned char buf[79];
