@@ -1,6 +1,7 @@
 /* Helper functions based off UAVTalk from OpenPilot to convert DS4 data to
  * information our quadcopter can understand */
 #include "manualcontrol.h"
+#include "crc.h"
 
 //STOLEN FROM OPENPILOT.
 // /build/uavobject-synthetics/flight/manualcontrolcommand.h
@@ -61,7 +62,6 @@ typedef struct {
 
 // Returns num bytes in buffer
 int controller_data_to_control_command(ds4_controls_t* ds4, uint8_t* buf) {
-  int i;
   UAVTalkHeader* header = (UAVTalkHeader*)(buf);
 
   header->SyncVal      = UAVTALK_SYNC_VAL;
@@ -80,6 +80,7 @@ int controller_data_to_control_command(ds4_controls_t* ds4, uint8_t* buf) {
 
   controls->Collective = 0.0f;
   controls->Thrust     = 0.0f;
+  int i;
   for (i = 0; i < 9; i++) {
     controls->Channel[i] = 0;
   }
@@ -88,7 +89,8 @@ int controller_data_to_control_command(ds4_controls_t* ds4, uint8_t* buf) {
   controls->Connected = 1;
   controls->FlightModeSwitchPosition = 0;
 
-  // NOTE: CRC Missing! @TODO
+  uint8_t *crc = buf + header->Length;
+  *crc = updateCRC(0x00, buf, header->Length);
 
-  return sizeof(UAVTalkHeader) + sizeof(ManualControlCommandData);
+  return header->Length + 1;
 }
