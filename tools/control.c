@@ -16,6 +16,7 @@ static int keep_running = 1;
 
 void intHandler(int dummy) {
   keep_running = 0;
+  signal(SIGINT, SIG_DFL);
 }
 
 void print_usage() {
@@ -29,10 +30,20 @@ int main(int argc, char** argv) {
   unsigned char data[11];
   ds4_controls_t* controls;
   uint8_t buffer[2048];
+  mraa_result_t result;
 
   mraa_i2c_context i2c;
   i2c = mraa_i2c_init(6);
-  mraa_i2c_address(i2c, 0);
+  if (!i2c) {
+    printf("Error: Could not init i2c\n");
+    return -1;
+  }
+
+  result = mraa_i2c_address(i2c, 4);
+  if (result != MRAA_SUCCESS) {
+    mraa_result_print(result);
+    return -1;
+  }
   
 
   // Scan
@@ -55,10 +66,12 @@ int main(int argc, char** argv) {
     read_from_ds4(&device, data, sizeof(data));
     controls = (ds4_controls_t*)(data + 2);
     ret = controller_data_to_control_command(controls, buffer);
-    mraa_i2c_write(i2c, buffer, ret);
-    usleep(5000);
+    result = mraa_i2c_write(i2c, buffer, ret);
+    if (result != MRAA_SUCCESS) {
+      mraa_result_print(result);
+      break;
+    }
   }
-  signal(SIGINT, SIG_DFL);
 
   mraa_i2c_stop(i2c);
   disconnect_from_ds4(&device);
