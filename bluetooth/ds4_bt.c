@@ -149,12 +149,12 @@ int control_ds4(ds4_bt_t* device, unsigned char* buffer, size_t len) {
   unsigned char buf[79];
   memset(buf, 0, 79);
   buf[0] = HIDP_TRANS_SET_REPORT | HIDP_DATA_RTYPE_OUTPUT;
-  buf[1] = 0x11; /* report id */
-  buf[2] = 128;
-  buf[4] = 255;
+  buf[1] = 0x11;  /* report id */
+  buf[2] = 0x80;  /* no idea why */
+  buf[4] = 0xFF;  /* no idea why */
 
-  buf[7] = 0; /* right rumble */
-  buf[8] = 0;   /* left rumble */
+  buf[7] = 0;     /* right rumble */
+  buf[8] = 0;     /* left rumble */
 
   buf[9]  = 0x00; // r
   buf[10] = 0xFF; // g
