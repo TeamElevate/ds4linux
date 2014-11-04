@@ -116,13 +116,13 @@ int connect_to_ds4(ds4_bt_t* device) {
 
   ret = connect(device->ctl_socket, (struct sockaddr *)&ctl_addr, sizeof(ctl_addr));
   if (ret != 0) {
-    printf("Error in creating socket: %s\n", strerror(errno));
+    printf("Error in creating ctl socket: %s\n", strerror(errno));
     return ret;
   }
 
   ret = connect(device->int_socket, (struct sockaddr *)&int_addr, sizeof(int_addr));
   if (ret != 0) {
-    printf("Error in creating socket: %s\n", strerror(errno));
+    printf("Error in creating int socket: %s\n", strerror(errno));
     return ret;
   }
 
