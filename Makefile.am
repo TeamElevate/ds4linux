@@ -20,6 +20,6 @@ if MRAA
 tools_control_SOURCES  = tools/control.c bluetooth/ds4_bt.c uavtalk/manualcontrol.c controller/ds4.c
 tools_control_LDADD    = $(BLUEZ_LIBS) $(MRAA_LIBS)
 
-tools_fakecontrol_SOURCES  = tools/fakecontrol.c uavtalk/manualcontrol.c controller/ds4.c
+tools_fakecontrol_SOURCES  = tools/fakecontrol.c uavtalk/manualcontrol.c controller/ds4.c bluetooth/ds4_bt.c
 tools_fakecontrol_LDADD    = $(MRAA_LIBS)
 endif

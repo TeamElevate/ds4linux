@@ -1,6 +1,7 @@
 // This will connect to a linux DS4
 
 #include <assert.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <time.h>
@@ -25,15 +26,17 @@ void print_usage() {
 }
 
 int main(int argc, char** argv) {
+  int bytes_read;
   int num_found = 0;
   int ret;
   int i;
-  ds4_bt_t device;
   unsigned char data[11];
-  ds4_controls_t* controls;
+  const ds4_controls_t* controls;
   uint8_t buffer[2048];
   uint8_t* d = buffer;
   mraa_result_t result;
+
+  ds4_t* ds4 = ds4_new();
 
   mraa_i2c_context i2c;
   i2c = mraa_i2c_init(6);
@@ -49,34 +52,36 @@ int main(int argc, char** argv) {
   }
   
 
-  // Scan
-  num_found = scan_for_ds4(&device);
-  if (0 == num_found) {
+  // Warning: This could block for a little
+  ret = ds4_connect(ds4);
+  if (-2 == ret) {
     printf("DS4 Was not found\n");
     return -1;
   }
-
-  // Connect
-  ret = connect_to_ds4(&device);
-  if (ret != 0) {
+  if (-1 == ret) {
     printf("Error Connecting to DS4 controller\n");
     return -2;
   }
 
-  // Set up ds4 to send us all info
-  ret = control_ds4(&device, NULL, 0);
-  if (ret < 0) {
-    printf("Error setting up DS4 controller\n");
-    mraa_i2c_stop(i2c);
-    disconnect_from_ds4(&device);
-  }
+  // Set to Green
+  ds4_set_rgb(ds4, 0x00, 0xFF, 0x00);
   
   // read data
   signal(SIGINT, intHandler);
   while (keep_running) {
     d = buffer;
-    read_from_ds4(&device, data, sizeof(data));
-    controls = (ds4_controls_t*)(data + 4);
+    bytes_read = ds4_read(ds4);
+    if (bytes_read == -1) {
+      printf("Error Reading: %s\n", strerror(errno));
+      break;
+    } else if (bytes_read == 0) {
+      // Connection closed
+      printf("Controller disconnected\n");
+      break;
+    } else if (bytes_read != 79) {
+      continue;
+    }
+    controls = ds4_controls(ds4);
     ret = controller_data_to_control_command(controls, d);
     while (ret > 0) {
       result = mraa_i2c_write(i2c, d, (ret > 32) ? 32 : ret);
@@ -86,7 +91,7 @@ int main(int argc, char** argv) {
         mraa_result_print(result);
         mraa_i2c_stop(i2c);
         i2c = mraa_i2c_init(6);
-        result = mraa_i2c_address(i2c, 4);
+        mraa_i2c_address(i2c, 4);
         break;
       }
       usleep(100000);
@@ -99,7 +104,7 @@ int main(int argc, char** argv) {
   }
 
   mraa_i2c_stop(i2c);
-  disconnect_from_ds4(&device);
+  ds4_destroy(&ds4);
 
   return 0;
 }

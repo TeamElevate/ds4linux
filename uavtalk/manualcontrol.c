@@ -60,7 +60,7 @@ typedef struct {
 } __attribute__((packed)) UAVTalkHeader;
 
 // Returns num bytes in buffer
-int controller_data_to_control_command(ds4_controls_t* ds4, uint8_t* buf) {
+int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
   UAVTalkHeader* header = (UAVTalkHeader*)(buf);
 
   header->SyncVal      = UAVTALK_SYNC_VAL;
