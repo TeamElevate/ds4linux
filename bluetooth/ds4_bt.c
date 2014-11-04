@@ -160,16 +160,16 @@ int ds4_bt_write(ds4_bt_t* self, uint8_t rgb[3], uint8_t rumble) {
   unsigned char buf[79];
   memset(buf, 0, 79);
   buf[0] = HIDP_TRANS_SET_REPORT | HIDP_DATA_RTYPE_OUTPUT;
-  buf[1] = 0x11;  /* report id */
-  buf[2] = 0x80;  /* no idea why */
-  buf[4] = 0xFF;  /* no idea why */
+  buf[1] = 0x11;   /* report id */
+  buf[2] = 0x80;   /* no idea why */
+  buf[4] = 0xFF;   /* no idea why */
 
-  buf[7] = 0;     /* right rumble */
-  buf[8] = 0;     /* left rumble */
+  buf[7] = rumble; /* right rumble */
+  buf[8] = rumble; /* left rumble */
 
-  buf[9]  = 0x00; // r
-  buf[10] = 0xFF; // g
-  buf[11] = 0x00; // b
+  buf[9]  = rgb[0]; // r
+  buf[10] = rgb[1]; // g
+  buf[11] = rgb[2]; // b
 
   bytes_written = write(self->ctl_socket, buf, sizeof(buf));
   return bytes_written;

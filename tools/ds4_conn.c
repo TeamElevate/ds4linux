@@ -1,6 +1,7 @@
 // This will connect to a linux DS4
 
 #include <assert.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -30,7 +31,7 @@ int main(int argc, char** argv) {
 
   ds4_t* ds4 = ds4_new();
 
-  // Scan
+  // Warning: This could block for a little
   ret = ds4_connect(ds4);
   if (-2 == ret) {
     printf("DS4 Was not found\n");
@@ -43,21 +44,28 @@ int main(int argc, char** argv) {
 
   // Set to Green
   ds4_set_rgb(ds4, 0x00, 0xFF, 0x00);
+  // Set to Blue
+  ds4_set_rgb(ds4, 0x00, 0x00, 0xFF);
 
   // read data
   signal(SIGINT, intHandler);
   while (keep_running) {
     bytes_read = ds4_read(ds4);
-    if (bytes_read == 0) {
+    if (bytes_read == -1) {
+      printf("Error Reading: %s\n", strerror(errno));
+      break;
+    } else if (bytes_read == 0) {
       // Connection closed
-      ds4_disconnect(ds4);
       printf("Controller disconnected\n");
-      remote_disconnect = 1;
       break;
     } else if (bytes_read != 79) {
       continue;
     }
     controls = ds4_controls(ds4);
+    ds4_set_rgb(ds4, controls->left_analog_y, controls->left_analog_x, controls->right_analog_y);
+    if (controls->cross) {
+      ds4_rumble(ds4);
+    }
     printf("Left X: %6d Left Y: %6d Right X: %6d Right Y: %6d\n",
             controls->left_analog_x,
             controls->left_analog_y,
@@ -65,8 +73,6 @@ int main(int argc, char** argv) {
             controls->right_analog_y
           );
   }
-  if (!remote_disconnect) {
-    ds4_disconnect(ds4);
-  }
+  ds4_disconnect(ds4);
   return 0;
 }

@@ -1,4 +1,4 @@
-AM_CFLAGS = -Ibluetooth -Iusb -Icontroller -g -O0
+AM_CFLAGS = -Ibluetooth -Iusb -Icontroller
 if MRAA
 AM_CFLAGS += -Iuavtalk
 endif

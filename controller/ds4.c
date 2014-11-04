@@ -87,7 +87,7 @@ int ds4_read(ds4_t* self) {
   unsigned char buffer[79];
 
   assert(self);
-  ret = ds4_bt_read(self->bt, buffer, sizeof(ds4_controls_t));
+  ret = ds4_bt_read(self->bt, buffer, sizeof(buffer));
   if (ret == sizeof(buffer)) {
     memcpy(&self->controls, buffer + 4, sizeof(ds4_controls_t));
   }
