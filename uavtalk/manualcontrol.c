@@ -51,14 +51,13 @@ typedef ManualControlCommandDataPacked __attribute__((aligned(4))) ManualControl
 
 typedef struct {
   uint8_t  SyncVal     : 8;
-  uint8_t  UseTimestamp: 1; /* Should be 0 for now */
-  uint8_t  Version     : 3;
   uint8_t  MessageType : 4;
+  uint8_t  Version     : 3;
+  uint8_t  UseTimestamp: 1; /* Should be 0 for now */
   uint16_t Length      : 16;
   uint32_t ObjectID    : 32;
   uint32_t InstanceID  : 16;
-  /*uint16_t Timestamp   : 16;*/
-} UAVTalkHeader;
+} __attribute__((packed)) UAVTalkHeader;
 
 // Returns num bytes in buffer
 int controller_data_to_control_command(ds4_controls_t* ds4, uint8_t* buf) {

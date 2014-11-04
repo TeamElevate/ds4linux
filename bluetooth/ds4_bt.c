@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
@@ -146,6 +147,7 @@ int read_from_ds4(ds4_bt_t* device, unsigned char* buf, size_t len) {
 int control_ds4(ds4_bt_t* device, unsigned char* buffer, size_t len) {
   int bytes_written;
   unsigned char buf[79];
+  memset(buf, 0, 79);
   buf[0] = HIDP_TRANS_SET_REPORT | HIDP_DATA_RTYPE_OUTPUT;
   buf[1] = 0x11; /* report id */
   buf[2] = 128;
@@ -154,12 +156,9 @@ int control_ds4(ds4_bt_t* device, unsigned char* buffer, size_t len) {
   buf[7] = 0; /* right rumble */
   buf[8] = 0;   /* left rumble */
 
-  buf[9]  = 0; // r
-  buf[10] = 0; // g
-  buf[11] = 0; // b
-
-  buf[12] = 255; // time to flash bright
-  buf[13] = 255; // time to flash dark
+  buf[9]  = 0x00; // r
+  buf[10] = 0xFF; // g
+  buf[11] = 0x00; // b
 
   bytes_written = write(device->ctl_socket, buf, sizeof(buf));
   return bytes_written;

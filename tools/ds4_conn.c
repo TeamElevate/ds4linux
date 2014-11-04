@@ -13,6 +13,7 @@ static int keep_running = 1;
 
 void intHandler(int dummy) {
   keep_running = 0;
+  signal(SIGINT, SIG_DFL);
 }
 
 void print_usage() {
@@ -43,12 +44,12 @@ int main(int argc, char** argv) {
     return -2;
   }
 
-  // Set to send a lot of data
+  // Set up ds4 to send us all info
   ret = control_ds4(&device, NULL, 0);
 
   // read data
   signal(SIGINT, intHandler);
-  while (1) {
+  while (keep_running) {
     bytes_read = read_from_ds4(&device, data, sizeof(data));
     if (bytes_read == 0) {
       // Connection closed
@@ -60,16 +61,13 @@ int main(int argc, char** argv) {
       continue;
     }
     controls = (ds4_controls_t*)(data + 4);
-    printf("Accel X: %6d Accel Y: %6d Accel Z: %6d Roll: %6d Pitch: %6d Yaw: %6d\n",
-            controls->accel_x,
-            controls->accel_y,
-            controls->accel_z,
-            controls->roll,
-            controls->pitch,
-            controls->yaw
+    printf("Left X: %6d Left Y: %6d Right X: %6d Right Y: %6d\n",
+            controls->left_analog_x,
+            controls->left_analog_y,
+            controls->right_analog_x,
+            controls->right_analog_y
           );
   }
-  signal(SIGINT, SIG_DFL);
   if (!remote_disconnect) {
     disconnect_from_ds4(&device);
   }
