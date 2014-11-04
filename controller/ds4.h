@@ -1,6 +1,25 @@
 #ifndef __DS4_CONTROLLER__
 #define __DS4_CONTROLLER__
-typedef struct {
+#include <inttypes.h>   /* uint8_t */
+
+typedef struct _ds4_t ds4_t;
+typedef struct _ds4_controls_t ds4_controls_t;
+
+ds4_t* ds4_new();
+void ds4_destroy(ds4_t** self_p);
+
+int ds4_connect(ds4_t* self);
+int ds4_disconnect(ds4_t* self);
+
+int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b);
+int ds4_rumble(ds4_t* self);
+
+int ds4_read(ds4_t* self);
+const ds4_controls_t* ds4_controls(const ds4_t* self);
+
+
+// All the controller data
+struct _ds4_controls_t {
   // byte 0
   unsigned left_analog_x  : 8;
 
@@ -67,8 +86,8 @@ typedef struct {
   // byte 22 - 23
   int accel_z        : 16;
 
-  // The reset is  trackpad data... later
+  // The rest is  trackpad data... later
 
-} ds4_controls_t;
+};
 
 #endif
