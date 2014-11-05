@@ -78,7 +78,7 @@ int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) 
   controls->Yaw      = (ds4->right_analog_x - 128.0f) / 128.0f;
 
   controls->Collective = 0.0f;
-  controls->Thrust     = 0.0f;
+  controls->Thrust     = (ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
   int i;
   for (i = 0; i < 9; i++) {
     controls->Channel[i] = 0;

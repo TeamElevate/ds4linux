@@ -14,9 +14,10 @@ struct _ds4_t {
 
 ds4_t* ds4_new() {
   ds4_t* self = malloc(sizeof(ds4_t));
-  self->r = 0xFF;
-  self->g = 0xFF;
-  self->b = 0xFF;
+  self->r  = 0xFF;
+  self->g  = 0xFF;
+  self->b  = 0xFF;
+  self->bt = 0x0;
   return self;
 }
 

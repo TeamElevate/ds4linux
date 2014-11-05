@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include <ds4_usb.h>
@@ -25,6 +26,10 @@ void print_usage() {
   printf("ds4_connect\n");
 }
 
+static long get_time_diff(const struct timeval start, const struct timeval end) {
+  return ((end.tv_sec - start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec)/1000.0) + 0.5;
+}
+
 int main(int argc, char** argv) {
   int bytes_read;
   int num_found = 0;
@@ -35,6 +40,8 @@ int main(int argc, char** argv) {
   uint8_t buffer[2048];
   uint8_t* d = buffer;
   mraa_result_t result;
+  struct timeval start, end;
+  long seconds, useconds; 
 
   ds4_t* ds4 = ds4_new();
 
@@ -54,6 +61,7 @@ int main(int argc, char** argv) {
 
   // Warning: This could block for a little
   ret = ds4_connect(ds4);
+
   if (-2 == ret) {
     printf("DS4 Was not found\n");
     return -1;
@@ -65,6 +73,8 @@ int main(int argc, char** argv) {
 
   // Set to Green
   ds4_set_rgb(ds4, 0x00, 0xFF, 0x00);
+
+  gettimeofday(&start, NULL);
   
   // read data
   signal(SIGINT, intHandler);
@@ -82,25 +92,30 @@ int main(int argc, char** argv) {
       continue;
     }
     controls = ds4_controls(ds4);
-    ret = controller_data_to_control_command(controls, d);
-    while (ret > 0) {
-      result = mraa_i2c_write(i2c, d, (ret > 32) ? 32 : ret);
-      d += (ret > 32) ? 32 : ret;
-      ret = ret - 32;
-      if (result != MRAA_SUCCESS) {
-        mraa_result_print(result);
-        mraa_i2c_stop(i2c);
-        i2c = mraa_i2c_init(6);
-        mraa_i2c_address(i2c, 4);
-        break;
+    gettimeofday(&end, NULL);
+    if (get_time_diff(start, end) > 10) {
+      gettimeofday(&start, NULL);
+      ret = controller_data_to_control_command(controls, d);
+      printf("Raw: %d\n", controls->right_analog_y);
+      printf("Thrust: %f\n", (controls->right_analog_y > 127) ? (controls->right_analog_y - 127.0f) / 128.0f : 0.0f);
+      while (ret > 0) {
+        result = mraa_i2c_write(i2c, d, (ret > 32) ? 32 : ret);
+        d += (ret > 32) ? 32 : ret;
+        ret = ret - 32;
+        if (result != MRAA_SUCCESS) {
+          mraa_result_print(result);
+          mraa_i2c_stop(i2c);
+          i2c = mraa_i2c_init(6);
+          mraa_i2c_address(i2c, 4);
+          break;
+        }
       }
-      usleep(100000);
+      for (i = 0; i < 55; i++) {
+        printf("%02x ", buffer[i]);
+      }
+      printf("\n");
+      printf("Bytes: %d\n", 55);
     }
-    for (i = 0; i < 55; i++) {
-      printf("%02x ", buffer[i]);
-    }
-    printf("\n");
-    printf("Bytes: %d\n", 55);
   }
 
   mraa_i2c_stop(i2c);
