@@ -8,6 +8,7 @@ typedef struct _ds4_controls_t ds4_controls_t;
 ds4_t* ds4_new();
 void ds4_destroy(ds4_t** self_p);
 
+int ds4_scan(ds4_t* self);
 int ds4_connect(ds4_t* self);
 int ds4_disconnect(ds4_t* self);
 

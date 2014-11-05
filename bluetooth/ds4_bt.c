@@ -107,10 +107,17 @@ int ds4_bt_connect(ds4_bt_t* self) {
   struct sockaddr_l2 int_addr = { 0 };
   assert(self);
 
+  if (ds4_bt_connected(self)) {
+    return 0;
+  }
+
   self->ctl_socket = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
   if (self->ctl_socket == -1) return -1;
   self->int_socket = socket(AF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
-  if (self->int_socket == -1) return -1;
+  if (self->int_socket == -1) {
+    self->ctl_socket = -1;
+    return -1;
+  }
 
   ctl_addr.l2_family = AF_BLUETOOTH;
   ctl_addr.l2_psm    = htobs(L2CAP_PSM_HIDP_CTRL);
@@ -122,13 +129,14 @@ int ds4_bt_connect(ds4_bt_t* self) {
 
   ret = connect(self->ctl_socket, (struct sockaddr *)&ctl_addr, sizeof(ctl_addr));
   if (ret != 0) {
+    ds4_bt_disconnect(self);
     printf("Error in creating ctl socket: %s\n", strerror(errno));
     return ret;
   }
 
   ret = connect(self->int_socket, (struct sockaddr *)&int_addr, sizeof(int_addr));
   if (ret != 0) {
-    close(self->ctl_socket);
+    ds4_bt_disconnect(self);
     printf("Error in creating int socket: %s\n", strerror(errno));
     return ret;
   }
@@ -137,7 +145,8 @@ int ds4_bt_connect(ds4_bt_t* self) {
 }
 
 int ds4_bt_disconnect(ds4_bt_t* self) {
-  if (self->ctl_socket != -1) {
+  assert(self);
+  if (ds4_bt_connected(self)) {
     close(self->ctl_socket);
     close(self->int_socket);
   }
@@ -148,6 +157,7 @@ int ds4_bt_disconnect(ds4_bt_t* self) {
 
 int ds4_bt_read(ds4_bt_t* self, unsigned char* buf, size_t len) {
   int bytes_read;
+  assert(self);
 
   bytes_read = read(self->int_socket, buf, len);
 
@@ -173,6 +183,11 @@ int ds4_bt_write(ds4_bt_t* self, uint8_t rgb[3], uint8_t rumble) {
 
   bytes_written = write(self->ctl_socket, buf, sizeof(buf));
   return bytes_written;
+}
+
+int ds4_bt_connected(const ds4_bt_t* self) {
+  assert(self);
+  return self->ctl_socket != -1;
 }
 
 int get_bd_addr(char* addr) {

@@ -33,22 +33,35 @@ void ds4_destroy(ds4_t** self_p) {
   }
 }
 
+int ds4_scan(ds4_t* self) {
+  int num_found;
+  assert(self);
+  if (self->bt) return -1;
+  self->bt = ds4_bt_new();
+  num_found = ds4_bt_scan(self->bt);
+  if (num_found < 0) {
+    ds4_bt_destroy(&self->bt);
+    return -1;
+  }
+  return num_found;
+}
+
 int ds4_connect(ds4_t* self) {
   assert(self);
 
-  if(self->bt) return 0;
-  self->bt = ds4_bt_new();
-  if (ds4_bt_scan(self->bt) <= 0) {
-    ds4_bt_destroy(&self->bt);
-    return -2;
+  if (!self->bt) return -1;
+
+  if (ds4_bt_connected(self->bt)) {
+    return 0;
   }
+
   if (ds4_bt_connect(self->bt) != 0) {
     ds4_bt_destroy(&self->bt);
     return -1;
   }
+
   // So that we recieved correct packets back
-  ds4_set_rgb(self, self->r, self->g, self->b);
-  return 0;
+  return ds4_set_rgb(self, self->r, self->g, self->b);
 }
 
 int ds4_disconnect(ds4_t* self) {
@@ -59,7 +72,7 @@ int ds4_disconnect(ds4_t* self) {
   return 0;
 }
 
-int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b) {
+static int ds4_set_state(ds4_t* self, uint8_t r, uint8_t g, uint8_t b, uint8_t rumble) {
   uint8_t rgb[3];
   assert(self);
   if (!self->bt) return -1;
@@ -69,18 +82,17 @@ int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b) {
   rgb[0] = self->r;
   rgb[1] = self->g;
   rgb[2] = self->b;
-  return ds4_bt_write(self->bt, rgb, 0);
+  return ds4_bt_write(self->bt, rgb, rumble);
+}
+
+int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b) {
+  assert(self);
+  return ds4_set_state(self, r, g, b, 0);
 }
 
 int ds4_rumble(ds4_t* self) {
-  uint8_t rgb[3];
   assert(self);
-  if (!self->bt) return -1;
-
-  rgb[0] = self->r;
-  rgb[1] = self->g;
-  rgb[2] = self->b;
-  return ds4_bt_write(self->bt, rgb, 0xFF);
+  return ds4_set_state(self, self->r, self->g, self->b, 0xFF);
 }
 
 int ds4_read(ds4_t* self) {

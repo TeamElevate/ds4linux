@@ -31,21 +31,26 @@ int main(int argc, char** argv) {
 
   ds4_t* ds4 = ds4_new();
 
-  // Warning: This could block for a little
-  ret = ds4_connect(ds4);
-  if (-2 == ret) {
-    printf("DS4 Was not found\n");
+  // scan for ds4
+  ret = ds4_scan(ds4);
+  if (ret == 0) {
+    printf("No DS4 Controllers found\n");
+    return -1;
+  } else if (ret < 0) {
+    printf("Error while scanning\n");
     return -1;
   }
+
+  // Connect to for one found
+  ret = ds4_connect(ds4);
   if (-1 == ret) {
     printf("Error Connecting to DS4 controller\n");
-    return -2;
+    return -1;
+  } else if (ret == 0) {
+    printf("Error: Lost connection to DS4 controller\n");
+    ds4_disconnect(ds4);
+    return -1;
   }
-
-  // Set to Green
-  ds4_set_rgb(ds4, 0x00, 0xFF, 0x00);
-  // Set to Blue
-  ds4_set_rgb(ds4, 0x00, 0x00, 0xFF);
 
   // read data
   signal(SIGINT, intHandler);

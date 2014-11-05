@@ -15,6 +15,8 @@ int ds4_bt_disconnect(ds4_bt_t* self);
 int ds4_bt_read(ds4_bt_t* self, unsigned char* buf, size_t len);
 int ds4_bt_write(ds4_bt_t* self, uint8_t rgb[3], uint8_t rumble);
 
+int ds4_bt_connected(const ds4_bt_t* self);
+
 // Gets the addr of the bluetooth chip
 // Len must be greater than 19
 int get_bd_addr(char* addr);
