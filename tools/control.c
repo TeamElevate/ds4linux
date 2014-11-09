@@ -33,6 +33,7 @@ static long get_time_diff(const struct timeval start, const struct timeval end) 
 int main(int argc, char** argv) {
   int bytes_read;
   int num_found = 0;
+  int num_sent = 0;
   int ret;
   int i;
   unsigned char data[11];
@@ -59,16 +60,25 @@ int main(int argc, char** argv) {
   }
   
 
-  // Warning: This could block for a little
-  ret = ds4_connect(ds4);
-
-  if (-2 == ret) {
-    printf("DS4 Was not found\n");
+  // scan for ds4
+  ret = ds4_scan(ds4);
+  if (ret == 0) {
+    printf("No DS4 Controllers found\n");
+    return -1;
+  } else if (ret < 0) {
+    printf("Error while scanning\n");
     return -1;
   }
+
+  // Connect to for one found
+  ret = ds4_connect(ds4);
   if (-1 == ret) {
     printf("Error Connecting to DS4 controller\n");
-    return -2;
+    return -1;
+  } else if (ret == 0) {
+    printf("Error: Lost connection to DS4 controller\n");
+    ds4_disconnect(ds4);
+    return -1;
   }
 
   // Set to Green
@@ -113,8 +123,10 @@ int main(int argc, char** argv) {
       for (i = 0; i < 55; i++) {
         printf("%02x ", buffer[i]);
       }
+      num_sent++;
       printf("\n");
       printf("Bytes: %d\n", 55);
+      printf("Num Sent: %d\n", num_sent);
     }
   }
 
