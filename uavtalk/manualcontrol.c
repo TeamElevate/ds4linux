@@ -1,5 +1,7 @@
 /* Helper functions based off UAVTalk from OpenPilot to convert DS4 data to
  * information our quadcopter can understand */
+#include <string.h>
+
 #include "manualcontrol.h"
 #include "crc.h"
 
@@ -83,6 +85,35 @@ int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) 
   for (i = 0; i < 9; i++) {
     controls->Channel[i] = 0;
   }
+  // dpad           : 3;
+  controls->Channel[0] |= (ds4->dpad << 0);
+  // _unknown       : 1;
+  controls->Channel[0] |= (ds4->_unknown << 3);
+  // square         : 1;
+  controls->Channel[0] |= (ds4->square << 4);
+  // cross          : 1;
+  controls->Channel[0] |= (ds4->cross << 5);
+  // circle         : 1;
+  controls->Channel[0] |= (ds4->circle << 6);
+  // triangle       : 1;
+  controls->Channel[0] |= (ds4->triangle << 7);
+
+  // l1             : 1;
+  controls->Channel[1] |= (ds4->l1 << 0);
+  // r1             : 1;
+  controls->Channel[1] |= (ds4->r1 << 1);
+  // l2             : 1;
+  controls->Channel[1] |= (ds4->l2 << 2);
+  // r2             : 1;
+  controls->Channel[1] |= (ds4->r2 << 3);
+  // share          : 1;
+  controls->Channel[1] |= (ds4->share << 4);
+  // options        : 1;
+  controls->Channel[1] |= (ds4->options << 5);
+  // l3             : 1;
+  controls->Channel[1] |= (ds4->l3 << 6);
+  // r3             : 1;
+  controls->Channel[1] |= (ds4->r3 << 7);
 
   // Not really sure what this does yet
   controls->Connected = 1;
