@@ -25,6 +25,8 @@ void intHandler(int dummy) {
 static int send_controls(mraa_i2c_context i2c, uint8_t* buf, int len) {
   int total = len;
   int to_send = 0;
+  mraa_result_t result;
+
   while (len > 0) {
     to_send = (len > 32) ? 32 : len;
     result = mraa_i2c_write(i2c, buf, to_send);
