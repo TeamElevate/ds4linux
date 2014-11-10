@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <errno.h>
+#include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -153,6 +154,19 @@ int ds4_bt_disconnect(ds4_bt_t* self) {
   self->ctl_socket = -1;
   self->int_socket = -1;
   return 0;
+}
+
+int ds4_bt_peek(ds4_bt_t* self) {
+  struct pollfd ufds[1];
+  int ret;
+  if (self->ctl_socket == -1) return -1;
+
+  ufds[0].fd = self->int_socket;
+  ufds[0].events = POLLIN;
+
+  ret = poll(ufds, 1, 0);
+
+  return ufds[0].revents & POLLIN;
 }
 
 int ds4_bt_read(ds4_bt_t* self, unsigned char* buf, size_t len) {

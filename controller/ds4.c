@@ -36,8 +36,10 @@ void ds4_destroy(ds4_t** self_p) {
 int ds4_scan(ds4_t* self) {
   int num_found;
   assert(self);
-  if (self->bt) return -1;
-  self->bt = ds4_bt_new();
+  if (!self->bt) {
+    self->bt = ds4_bt_new();
+    if (!self->bt) return -1;
+  }
   num_found = ds4_bt_scan(self->bt);
   if (num_found < 0) {
     ds4_bt_destroy(&self->bt);
@@ -95,6 +97,11 @@ int ds4_rumble(ds4_t* self) {
   return ds4_set_state(self, self->r, self->g, self->b, 0xFF);
 }
 
+int ds4_peek(ds4_t* self) {
+  if (!self->bt) return -1;
+  return ds4_bt_peek(self->bt);
+}
+
 int ds4_read(ds4_t* self) {
   int ret;
   unsigned char buffer[79];
@@ -104,6 +111,10 @@ int ds4_read(ds4_t* self) {
   if (ret == sizeof(buffer)) {
     memcpy(&self->controls, buffer + 4, sizeof(ds4_controls_t));
   }
+  self->controls.left_analog_x = htobs(self->controls.left_analog_x);
+  self->controls.left_analog_y = htobs(self->controls.left_analog_y);
+  self->controls.right_analog_x = htobs(self->controls.right_analog_x);
+  self->controls.right_analog_y = 255 - htobs(self->controls.right_analog_y);
   return ret;
 }
 
