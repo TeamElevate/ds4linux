@@ -20,6 +20,6 @@ tools_ds4_daemon_SOURCES   = tools/ds4_daemon.c bluetooth/ds4_bt.c controller/ds
 tools_ds4_daemon_LDADD   = $(BLUEZ_LIBS)
 
 if MRAA
-tools_control_SOURCES  = tools/control.c bluetooth/ds4_bt.c uavtalk/manualcontrol.c controller/ds4.c
+tools_control_SOURCES  = tools/control.c bluetooth/ds4_bt.c uavtalk/manualcontrol.c controller/ds4.c uavtalk/uavtalkheader.c
 tools_control_LDADD    = $(BLUEZ_LIBS) $(MRAA_LIBS)
 endif

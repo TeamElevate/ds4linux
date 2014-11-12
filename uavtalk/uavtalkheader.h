@@ -18,6 +18,6 @@ typedef struct {
   uint32_t InstanceID  : 16;
 } __attribute__((packed)) UAVTalkHeader;
 
-int UAVTalkHeader(uint8_t *buf, uint8_t type, uint32_t objId, uint16_t length);
+uint16_t makeUAVTalkHeader(uint8_t *buf, uint8_t type, uint32_t objId, uint16_t length);
 
 #endif

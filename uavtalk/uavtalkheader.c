@@ -1,6 +1,6 @@
 #include "uavtalkheader.h"
 
-int UAVTalkHeader(uint8_t *buf, uint8_t type, uint32_t objId, uint16_t length) {
+uint16_t makeUAVTalkHeader(uint8_t *buf, uint8_t type, uint32_t objId, uint16_t length) {
   UAVTalkHeader* header = (UAVTalkHeader*)(buf);
 
   header->SyncVal      = UAVTALK_SYNC_VAL;
@@ -10,6 +10,6 @@ int UAVTalkHeader(uint8_t *buf, uint8_t type, uint32_t objId, uint16_t length) {
   header->Length       = sizeof(UAVTalkHeader) + length;
   header->ObjectID     = objId;
   header->InstanceID   = 0;
-  
-  return buf + sizeof(UAVTalkHeader);
+
+  return sizeof(UAVTalkHeader);
 }

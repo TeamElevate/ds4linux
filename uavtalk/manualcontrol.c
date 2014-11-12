@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "manualcontrol.h"
+#include "uavtalkheader.h"
 
 //STOLEN FROM OPENPILOT.
 // /build/uavobject-synthetics/flight/manualcontrolcommand.h
@@ -43,11 +44,11 @@ typedef ManualControlCommandDataPacked __attribute__((aligned(4))) ManualControl
 // END
 
 // Returns num bytes in buffer
-int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
-  int headerSize = UAVTalkHeader(buf, UAVTALK_MESSAGE_TYPE_OBJ, MANUALCONTROLCOMMAND_OBJID, sizeof(ManualControlCommandData));
-  
+uint16_t controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
+  int headerSize = makeUAVTalkHeader(buf, UAVTALK_MESSAGE_TYPE_OBJ, MANUALCONTROLCOMMAND_OBJID, sizeof(ManualControlCommandData));
+
   ManualControlCommandData* controls = (ManualControlCommandData *) (buf + headerSize);
-  
+
   controls->Throttle = (ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
   controls->Roll     = (ds4->left_analog_x - 128.0f) / 128.0f;
   controls->Pitch    = (ds4->left_analog_y - 128.0f) / 128.0f;

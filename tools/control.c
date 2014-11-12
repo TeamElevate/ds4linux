@@ -27,11 +27,11 @@ static int send_UAVObj(mraa_i2c_context i2c, uint8_t* buf, int len) {
   int total = len;
   int to_send = 0;
   mraa_result_t result;
-  
+
   uint8_t *crc = buf + len;
-  *crc = updateCRC(0x00, buf, header->Length);
+  *crc = updateCRC(0x00, buf, len);
   len++;
-  
+
   while (len > 0) {
     to_send = (len > 32) ? 32 : len;
     result = mraa_i2c_write(i2c, buf, to_send);
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   ds4_set_rgb(ds4, 0x00, 0xFF, 0x00);
 
   gettimeofday(&start, NULL);
-  
+
   signal(SIGINT, intHandler);
   while (keep_running) {
     bytes_read = ds4_read(ds4);
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
 
     ret = controller_data_to_control_command(controls, buffer);
 
-    ret = send_controls(i2c, buffer, ret);
+    ret = send_UAVObj(i2c, buffer, ret);
 
     // If error while sending, try reinitizalizing
     if (ret == -1) {
