@@ -129,7 +129,6 @@ int main(int argc, char** argv) {
 
     controls = ds4_controls(ds4);
 
-
     gettimeofday(&end, NULL);
 
     if (get_time_diff(start, end) < 50) continue;
