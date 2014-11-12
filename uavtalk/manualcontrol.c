@@ -110,13 +110,14 @@ uint16_t controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* 
 
   ManualControlCommandData* controls = (ManualControlCommandData *) (buf + headerSize);
 
-  controls->Throttle = calcThrottle(ds4->right_analog_y); //(ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
+  float throttle = calcThrottle(ds4->right_analog_y);
+  controls->Throttle = throttle;
+  controls->Thrust   = throttle;
   controls->Roll     = (ds4->left_analog_x - 128.0f) / 128.0f;
   controls->Pitch    = (ds4->left_analog_y - 128.0f) / 128.0f;
   controls->Yaw      = (ds4->r2_analog - ds4->l2_analog) / 256.0f;
 
   controls->Collective = 0.0f;
-  controls->Thrust     = (ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
   int i;
   for (i = 0; i < 9; i++) {
     controls->Channel[i] = 0;
