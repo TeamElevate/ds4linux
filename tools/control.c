@@ -12,6 +12,7 @@
 #include <ds4_bt.h>
 #include <ds4.h>
 #include <manualcontrol.h>
+#include <crc.h>
 
 #include <mraa/i2c.h>
 
@@ -22,11 +23,15 @@ void intHandler(int dummy) {
   signal(SIGINT, SIG_DFL);
 }
 
-static int send_controls(mraa_i2c_context i2c, uint8_t* buf, int len) {
+static int send_UAVObj(mraa_i2c_context i2c, uint8_t* buf, int len) {
   int total = len;
   int to_send = 0;
   mraa_result_t result;
-
+  
+  uint8_t *crc = buf + len;
+  *crc = updateCRC(0x00, buf, header->Length);
+  len++;
+  
   while (len > 0) {
     to_send = (len > 32) ? 32 : len;
     result = mraa_i2c_write(i2c, buf, to_send);
@@ -138,7 +143,7 @@ int main(int argc, char** argv) {
     if (ret == -1) {
       mraa_i2c_stop(i2c);
       i2c = mraa_i2c_init(6);
-      mraa_i2c_address(i2c, 4);
+      mraa_i2c_address(i2c, 0);
       continue;
     }
 
