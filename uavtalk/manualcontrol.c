@@ -3,16 +3,12 @@
 #include <string.h>
 
 #include "manualcontrol.h"
-#include "crc.h"
+#include "uavtalkheader.h"
 
 //STOLEN FROM OPENPILOT.
 // /build/uavobject-synthetics/flight/manualcontrolcommand.h
 
 #define MANUALCONTROLCOMMAND_OBJID 0x161A2C98
-#define MANUALCONTROLCOMMAND_ISSINGLEINST 1
-#define MANUALCONTROLCOMMAND_ISSETTINGS 0
-#define MANUALCONTROLCOMMAND_ISPRIORITY 0
-#define MANUALCONTROLCOMMAND_NUMBYTES sizeof(ManualControlCommandData)
 
 // Enumeration options for field Connected
 typedef enum {
@@ -47,40 +43,81 @@ typedef ManualControlCommandDataPacked __attribute__((aligned(4))) ManualControl
 // /build/uavobject-synthetics/flight/manualcontrolcommand.h
 // END
 
-#define UAVTALK_SYNC_VAL 0x3C
-#define UAVTALK_MESSAGE_TYPE_OBJ 0x0
-#define UAVTALK_VERSION 0x2
+#define DS4_CENTER_THRESHOLD 5
+#define DS4_HOLD 3
+#define DS4_MAX (128 - DS4_CENTER_THRESHOLD)
 
-typedef struct {
-  uint8_t  SyncVal     : 8;
-  uint8_t  MessageType : 4;
-  uint8_t  Version     : 3;
-  uint8_t  UseTimestamp: 1; /* Should be 0 for now */
-  uint16_t Length      : 16;
-  uint32_t ObjectID    : 32;
-  uint32_t InstanceID  : 16;
-} __attribute__((packed)) UAVTalkHeader;
+float calcThrottle(int stick) {
+  static int last_stick[DS4_HOLD] = {0, 0, 0};
+  static int throttle_offset = 0;
+  static int proposed_offset_stick = 0;
+
+  int throttle = 0;
+  // Normalize the stick around the center.
+  if (stick >= 128 - DS4_CENTER_THRESHOLD && stick <= 128 + DS4_CENTER_THRESHOLD)
+    stick = 0;
+  else if (stick > 128 + DS4_CENTER_THRESHOLD)
+    stick = stick - 128 - DS4_CENTER_THRESHOLD;
+  else
+    stick = stick - 128 + DS4_CENTER_THRESHOLD;
+
+  int stick_deriv = stick - last_stick[0];
+
+  // Correct for center overshoot.
+  if ((stick > 0 && stick < 20 && stick_deriv > 80) || (stick < 0 && stick > -20 && stick_deriv < -80))
+    stick = 0;
+
+  // Ignore fast changes heading toward the center.
+  if ((stick > 0 && stick_deriv < -40) || (stick < 0 && stick_deriv > 40)) {
+    throttle = throttle_offset + last_stick[0];
+  } else if (stick == 0) {
+    if (last_stick[DS4_HOLD - 1] - proposed_offset_stick <= 1 && last_stick[DS4_HOLD - 1] - proposed_offset_stick >= -1) {
+      throttle_offset += proposed_offset_stick;
+      if (throttle_offset > DS4_MAX)
+        throttle_offset = DS4_MAX;
+      if (throttle_offset < 0)
+        throttle_offset = 0;
+    }
+    proposed_offset_stick = 0;
+    throttle = throttle_offset;
+  } else {
+    throttle = throttle_offset + stick;
+    int val = stick;
+    int i;
+    for (i = 0; i < DS4_HOLD; i++) {
+      if (val - last_stick[i] > 1 || val - last_stick[i] < -1)
+        break;
+    }
+    if (i == DS4_HOLD)
+      proposed_offset_stick = val;
+  }
+
+  int i;
+  for (i = DS4_HOLD - 1; i >= 1; i--)
+    last_stick[i] = last_stick[i - 1];
+  last_stick[0] = stick;
+
+  if (throttle > DS4_MAX)
+    throttle = DS4_MAX;
+  if (throttle < 0)
+    throttle = 0;
+  return throttle / (float) DS4_MAX;
+}
 
 // Returns num bytes in buffer
-int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
-  UAVTalkHeader* header = (UAVTalkHeader*)(buf);
+uint16_t controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
+  int headerSize = makeUAVTalkHeader(buf, UAVTALK_MESSAGE_TYPE_OBJ, MANUALCONTROLCOMMAND_OBJID, sizeof(ManualControlCommandData));
 
-  header->SyncVal      = UAVTALK_SYNC_VAL;
-  header->UseTimestamp = 0;
-  header->Version      = UAVTALK_VERSION;
-  header->MessageType  = UAVTALK_MESSAGE_TYPE_OBJ;
-  header->Length       = sizeof(UAVTalkHeader) + sizeof(ManualControlCommandData);
-  header->ObjectID     = MANUALCONTROLCOMMAND_OBJID;
-  header->InstanceID   = 0;
+  ManualControlCommandData* controls = (ManualControlCommandData *) (buf + headerSize);
 
-  ManualControlCommandData* controls = (ManualControlCommandData*)(buf + sizeof(UAVTalkHeader));
-  controls->Throttle = (ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
+  float throttle = calcThrottle(ds4->right_analog_y);
+  controls->Throttle = throttle;
+  controls->Thrust   = throttle;
   controls->Roll     = (ds4->left_analog_x - 128.0f) / 128.0f;
   controls->Pitch    = (ds4->left_analog_y - 128.0f) / 128.0f;
-  controls->Yaw      = (ds4->right_analog_x - 128.0f) / 128.0f;
+  controls->Yaw      = (ds4->r2_analog - ds4->l2_analog) / 256.0f;
 
   controls->Collective = 0.0f;
-  controls->Thrust     = (ds4->right_analog_y > 127) ? (ds4->right_analog_y - 127.0f) / 128.0f : 0.0f;
   int i;
   for (i = 0; i < 9; i++) {
     controls->Channel[i] = 0;
@@ -119,8 +156,5 @@ int controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) 
   controls->Connected = 1;
   controls->FlightModeSwitchPosition = 0;
 
-  uint8_t *crc = buf + header->Length;
-  *crc = updateCRC(0x00, buf, header->Length);
-
-  return header->Length + 1;
+  return headerSize + sizeof(ManualControlCommandData);
 }

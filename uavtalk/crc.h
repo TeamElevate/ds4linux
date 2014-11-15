@@ -22,7 +22,7 @@ const uint8_t crc_table[256] = {
     0xde, 0xd9, 0xd0, 0xd7, 0xc2, 0xc5, 0xcc, 0xcb, 0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3
 };
 
-uint8_t updateCRC(uint8_t crc, const uint8_t *data, int32_t length)
+inline uint8_t updateCRC(uint8_t crc, const uint8_t *data, int32_t length)
 {
     while (length--) {
         crc = crc_table[crc ^ *data++];
