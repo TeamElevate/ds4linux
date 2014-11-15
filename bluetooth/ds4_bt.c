@@ -84,7 +84,9 @@ int ds4_bt_scan(ds4_bt_t* self) {
   ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
 
   num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
-  assert(num_rsp >= 0);
+  if (num_rsp < 0) {
+    return -1;
+  }
 
   // @TODO: There has to be a better way of finding the device
   for (i = 0; i < num_rsp; i++) {
