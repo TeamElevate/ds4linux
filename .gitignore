@@ -15,8 +15,6 @@ depcomp
 install-sh
 missing
 
-bluetooth/.dirstamp
-tools/.dirstamp
-usb/.dirstamp
-controller/.dirstamp
 *.o
+*.swp
+*.dirstamp
