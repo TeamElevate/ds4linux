@@ -161,7 +161,7 @@ int ds4_bt_disconnect(ds4_bt_t* self) {
 int ds4_bt_peek(ds4_bt_t* self) {
   struct pollfd ufds[1];
   int ret;
-  if (self->ctl_socket == -1) return -1;
+  if (self->int_socket == -1) return -1;
 
   ufds[0].fd = self->int_socket;
   ufds[0].events = POLLIN;
