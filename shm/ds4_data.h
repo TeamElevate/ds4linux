@@ -2,6 +2,9 @@
 #define __ELEVATE_DS4_SHARED_DATA__
 #include <inttypes.h>
 #include <ds4.h>
+
+const char* const DS4_KEY_FILE;
+
 typedef struct {
   uint8_t        controller_connected;
   uint8_t        r;
