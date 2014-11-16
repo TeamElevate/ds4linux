@@ -9,8 +9,8 @@
 #include <sys/shm.h>
 
 #include <ds4.h>
-#include <shm.h>
 #include <ds4_data.h>
+#include <client.h>
 
 volatile sig_atomic_t keep_running;
 
@@ -20,54 +20,42 @@ void intHandler(int sig) {
 }
 
 int main() {
-  int len, ret;
+  int len, rc;
   ds4_controls_t* controls;
-  ds4_shared_data_t* shared_data;
+  ds4_client_t* client;
 
   struct sigaction sa;
   sa.sa_handler = intHandler;
   sa.sa_flags = 0;
   sigemptyset(&sa.sa_mask);
 
-  key_t key;
-  shm_t* shm;
-
   if (sigaction(SIGINT, &sa, NULL) == -1) {
     printf("ERROR: Could not set signal handler\n");
     return -1;
   }
 
-  // Setup shared memory
-  key = ftok("/opt/controller.ipc", 'R');
-  if (key == -1)  {
-    printf("ERROR: Failed to get key for shm\n");
-    return -1;
-  }
-  shm = shm_attach(key);
-  if (!shm) {
-    printf("ERROR: Daemon not running");
+  client = ds4_client_new();
+  if (!client) {
+    printf("Could not initialize client\n");
     return -1;
   }
 
-  shared_data = (ds4_shared_data_t*)shm_data(shm);
-  if (!shared_data) {
-    printf("Data is unavailable");
+  rc = ds4_client_attach(client);
+  if (rc == -1) {
+    printf("Could not attach to running daemon\n");
     return -1;
   }
-
 
   keep_running = 1;
 
   while (keep_running) {
-    shm_lock(shm);
-    if (shared_data->controller_connected) {
-      controls = (ds4_controls_t*)&(shared_data->controls);
+    if (ds4_client_is_controller_connected(client)) {
+      controls = ds4_client_controls(client);
       printf("Cross: %1u\n", controls->cross);
     }
-    shm_unlock(shm);
   }
 
-  shm_detach(shm);
+  ds4_client_destroy(&client);
 
   return 0;
 }
