@@ -140,11 +140,11 @@ int main(int argc, char** argv) {
 
     // If error while sending, try reinitizalizing
     if (ret == -1) {
+      // Bad I2C
+      ds4_set_rgb(ds4, 0xFF, 0x00, 0x00);
       mraa_i2c_stop(i2c);
       i2c = mraa_i2c_init(6);
 
-      // Bad I2C
-      ds4_set_rgb(ds4, 0xFF, 0x00, 0x00);
       mraa_i2c_address(i2c, 0);
       continue;
     }
