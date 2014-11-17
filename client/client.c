@@ -24,6 +24,9 @@ static void ds4_client_update(ds4_client_t* self) {
 
 ds4_client_t* ds4_client_new() {
   ds4_client_t* self = malloc(sizeof(ds4_client_t));
+
+  // Init to 0
+  memset(self, 0x0, sizeof(ds4_client_t));
   if (!self) return NULL;
 
   // Get key
@@ -72,4 +75,35 @@ ds4_controls_t* ds4_client_controls(ds4_client_t* self) {
   assert(self);
   ds4_client_update(self);
   return &self->shared_data.controls;
+}
+
+int ds4_client_rgb(ds4_client_t* self, uint8_t r, uint8_t g, uint8_t b) {
+  int rc;
+  assert(self);
+  assert(self->data);
+  ds4_shared_data_t* shared_data;
+  shared_data = (ds4_shared_data_t*)self->data;
+
+  // @TODO: Currently you can overwrite someone else's data
+  rc = shm_lock(self->shm);
+  shared_data->r = r;
+  shared_data->g = g;
+  shared_data->b = b;
+  shared_data->send_data = 1;
+  shm_unlock(self->shm);
+  return 0;
+}
+
+int ds4_client_rumble(ds4_client_t* self) {
+  assert(self);
+  assert(self->data);
+  ds4_shared_data_t* shared_data;
+  shared_data = (ds4_shared_data_t*)self->data;
+
+  // @TODO: Currently you can overwrite someone else's data
+  shm_lock(self->shm);
+  shared_data->rumble = 1;
+  shared_data->send_data = 1;
+  shm_unlock(self->shm);
+  return 0;
 }
