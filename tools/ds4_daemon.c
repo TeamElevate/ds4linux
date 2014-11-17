@@ -13,14 +13,20 @@
 volatile sig_atomic_t keep_running;
 
 void intHandler(int sig) {
+  struct sigaction sa;
+  sa.sa_handler = SIG_DFL;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
   keep_running = 0;
-  signal(sig, SIG_DFL);
+
+  sigaction(sig, &sa, NULL);
 }
 
 int main() {
   int num_ds4_found;
   int ds4_conn_status;
   int bytes_read;
+  int rc;
   const ds4_controls_t* controls;
   key_t key;
   ds4_shared_data_t* shared_data;
@@ -34,6 +40,14 @@ int main() {
 
 
   if (sigaction(SIGINT, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+  if (sigaction(SIGTERM, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+  if (sigaction(SIGHUP, &sa, NULL) == -1) {
     printf("ERROR: Could not set signal handler\n");
     return -1;
   }
@@ -89,6 +103,26 @@ int main() {
 
     // Send and receive until disconnect 
     while (keep_running) {
+      shm_lock(shm);
+      if (shared_data->send_data) {
+        uint8_t r, g, b, rumble;
+        r      = shared_data->r;
+        g      = shared_data->g;
+        b      = shared_data->b;
+        rumble = shared_data->rumble;
+        shared_data->rumble = 0;
+        shared_data->send_data = 0;
+        shm_unlock(shm);
+        printf("Sent RGB\n");
+        rc = ds4_set_rgb(ds4, r, g, b);
+        assert(rc > 0);
+        if (rumble) {
+          printf("Sent rumble\n");
+          ds4_rumble(ds4);
+        }
+      } else {
+        shm_unlock(shm);
+      }
       if (ds4_peek(ds4)) {
 
         bytes_read = ds4_read(ds4);
