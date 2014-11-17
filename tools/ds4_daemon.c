@@ -113,11 +113,9 @@ int main() {
         shared_data->rumble = 0;
         shared_data->send_data = 0;
         shm_unlock(shm);
-        printf("Sent RGB\n");
         rc = ds4_set_rgb(ds4, r, g, b);
         assert(rc > 0);
         if (rumble) {
-          printf("Sent rumble\n");
           ds4_rumble(ds4);
         }
       } else {
@@ -146,6 +144,7 @@ int main() {
           break;
         }
       }
+      usleep(500);
     }
     shm_lock(shm);
     shared_data->controller_connected = 0;
