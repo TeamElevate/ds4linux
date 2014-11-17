@@ -70,13 +70,12 @@ int main() {
     if (ds4_client_is_controller_connected(client)) {
       controls = ds4_client_controls(client);
       if (cross != controls->cross) {
-        printf("Cross: %x\n", controls->cross);
         cross = controls->cross;
-      }
-      if (controls->cross) {
-        ds4_client_rgb(client, 0xFF, 0x00, 0x00);
-      } else {
-        ds4_client_rgb(client, 0x00, 0xFF, 0x00);
+        if (controls->cross) {
+          ds4_client_rgb(client, 0xFF, 0x00, 0x00);
+        } else {
+          ds4_client_rgb(client, 0x00, 0xFF, 0x00);
+        }
       }
     }
   }
