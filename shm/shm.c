@@ -1,12 +1,14 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
 
 #include <ds4.h>
+#include <ds4_data.h>
 
 #include "shm.h"
 
@@ -83,6 +85,7 @@ static shm_t* shm_create_and_attach(key_t key, uint8_t create) {
     free(self);
     return NULL;
   }
+  memset(self->data, 0x0, sizeof(ds4_shared_data_t));
   self->locked = 0;
   return self;
 }
