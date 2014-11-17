@@ -40,11 +40,17 @@ static int send_UAVObj(mraa_i2c_context i2c, uint8_t* buf, int len) {
   return total;
 }
 
-static int keep_running = 1;
+volatile sig_atomic_t keep_running;
 
-void intHandler(int dummy) {
+void intHandler(int sig) {
+  struct sigaction sa;
+  sa.sa_handler = SIG_DFL;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
+
   keep_running = 0;
-  signal(SIGINT, SIG_DFL);
+  // Set back to default handler
+  sigaction(sig, &sa, NULL);
 }
 
 const int MAX_NUM_ERRS = 10;
@@ -59,9 +65,29 @@ int main(int argc, char** argv) {
   ds4_client_t* client;
   int numerrs;
 
+  struct sigaction sa;
+  sa.sa_handler = intHandler;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
+
   numerrs = 0;
 
+  keep_running = 1;
 
+
+  // Set Up SIG handler
+  if (sigaction(SIGINT, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+  if (sigaction(SIGHUP, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+  if (sigaction(SIGTERM, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
   while (keep_running) {
     if (numerrs > MAX_NUM_ERRS) {
       printf("ERROR: Too many errors. Exiting...\n");
@@ -110,20 +136,21 @@ int main(int argc, char** argv) {
 
 
     // Wait till I2C comes online
-    while (mraa_i2c_write_byte(i2c, 0x00) != MRAA_SUCCESS)
-      ;
+    while (keep_running && mraa_i2c_write_byte(i2c, 0x00) != MRAA_SUCCESS) {
+      sleep(1);
+    }
 
     // @TODO: Set controller to correct COLOR (waiting for controller)
 
     // Wait for a DS4 controller
-    while (!ds4_client_is_controller_connected(client))
-      ;
+    while (keep_running && !ds4_client_is_controller_connected(client)) {
+      sleep(1);
+    }
 
     // @TODO: Set controller to correct COLOR going
 
 
     gettimeofday(&start, NULL);
-    signal(SIGINT, intHandler);
     while (keep_running) {
       if (!ds4_client_is_controller_connected(client)) {
         continue;
