@@ -7,6 +7,7 @@ const char* const DS4_KEY_FILE;
 
 typedef struct {
   uint8_t        controller_connected;
+  uint8_t        send_data;
   uint8_t        r;
   uint8_t        g;
   uint8_t        b;
