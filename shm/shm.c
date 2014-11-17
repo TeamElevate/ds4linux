@@ -103,9 +103,8 @@ int shm_lock(shm_t* self) {
   operations[0].sem_flg = SEM_UNDO;
 
   rc = semop(self->semid, operations, 1);
-  if (rc == 0) {
-    self->locked = 1;
-  }
+  assert(rc == 0);
+  self->locked = 1;
   return rc;
 }
 
@@ -120,9 +119,8 @@ int shm_unlock(shm_t* self) {
   assert(self->locked);
 
   rc = semop(self->semid, operations, 1);
-  if (rc == 0) {
-    self->locked = 0;
-  }
+  assert(rc == 0);
+  self->locked = 0;
   return rc;
 }
 
