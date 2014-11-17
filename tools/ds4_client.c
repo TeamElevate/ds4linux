@@ -15,12 +15,18 @@
 volatile sig_atomic_t keep_running;
 
 void intHandler(int sig) {
+  struct sigaction sa;
+  sa.sa_handler = SIG_DFL;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
   keep_running = 0;
-  signal(sig, SIG_DFL);
+
+  sigaction(sig, &sa, NULL);
 }
 
 int main() {
   int len, rc;
+  uint8_t cross;
   ds4_controls_t* controls;
   ds4_client_t* client;
 
@@ -29,7 +35,19 @@ int main() {
   sa.sa_flags = 0;
   sigemptyset(&sa.sa_mask);
 
+  cross = 0;
+
   if (sigaction(SIGINT, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+
+  if (sigaction(SIGTERM, &sa, NULL) == -1) {
+    printf("ERROR: Could not set signal handler\n");
+    return -1;
+  }
+
+  if (sigaction(SIGHUP, &sa, NULL) == -1) {
     printf("ERROR: Could not set signal handler\n");
     return -1;
   }
@@ -51,7 +69,15 @@ int main() {
   while (keep_running) {
     if (ds4_client_is_controller_connected(client)) {
       controls = ds4_client_controls(client);
-      printf("Cross: %1u\n", controls->cross);
+      if (cross != controls->cross) {
+        printf("Cross: %x\n", controls->cross);
+        cross = controls->cross;
+      }
+      if (controls->cross) {
+        ds4_client_rgb(client, 0xFF, 0x00, 0x00);
+      } else {
+        ds4_client_rgb(client, 0x00, 0xFF, 0x00);
+      }
     }
   }
 
