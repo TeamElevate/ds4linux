@@ -124,38 +124,39 @@ int main(int argc, char** argv) {
       continue;
     }
 
-    rc = ds4_client_attach(client);
-    if (rc == -1) {
-      ds4_client_destroy(&client);
-      mraa_i2c_stop(i2c);
-      numerrs++;
-      printf("ERROR: Could not attach to daemon\n");
-      continue;
+    // Wait for a DS4 controller
+    while (keep_running && !ds4_client_connected(client)) {
+      sleep(1);
     }
-    
 
+    if (!keep_running) continue;
+
+    // Set color to orange while waiting for I2C
+    ds4_client_rgb(client, 255, 102, 0);
 
     // Wait till I2C comes online
     while (keep_running && mraa_i2c_write_byte(i2c, 0x00) != MRAA_SUCCESS) {
       sleep(1);
     }
 
-    // @TODO: Set controller to correct COLOR (waiting for controller)
-
-    // Wait for a DS4 controller
-    while (keep_running && !ds4_client_is_controller_connected(client)) {
-      sleep(1);
+    if (!keep_running) {
+      ds4_client_rgb(client, 0xFF, 0xFF,0xFF);
+      continue;
     }
 
-    // @TODO: Set controller to correct COLOR going
+    // @TODO: Set controller to green
+    ds4_client_rgb(client, 0, 255, 0);
 
 
     gettimeofday(&start, NULL);
     while (keep_running) {
-      if (!ds4_client_is_controller_connected(client)) {
-        continue;
-      }
       controls = ds4_client_controls(client);
+      if (!controls) {
+        // Bad Controller
+        numerrs++;
+        break;
+      }
+
       gettimeofday(&end, NULL);
       
       if (get_time_diff(start, end) < 50) continue;
@@ -167,17 +168,18 @@ int main(int argc, char** argv) {
       // If error while sending, try reinitizalizing
       if (rc == -1) {
         // Bad I2C
-        //@TODO: ds4_set_rgb(ds4, 0xFF, 0x00, 0x00);
+        ds4_client_rgb(client, 0xFF, 0x00, 0x00);
         numerrs++;
         break;
       }
       numerrs = 0;
 
-      // @TODO:Set to Green if successful
+      ds4_client_rgb(client, 0x00, 0xFF, 0x00);
 
       printf("Bytes: %d\n", rc);
     }
     mraa_i2c_stop(i2c);
+    ds4_client_rgb(client, 0xFF, 0xFF, 0xFF);
     ds4_client_destroy(&client);
   }
 
