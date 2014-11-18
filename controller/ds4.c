@@ -74,6 +74,12 @@ int ds4_disconnect(ds4_t* self) {
   return 0;
 }
 
+int ds4_socket(ds4_t* self) {
+  assert(self);
+  assert(self->bt);
+  return ds4_bt_handle(self->bt);
+}
+
 static int ds4_set_state(ds4_t* self, uint8_t r, uint8_t g, uint8_t b, uint8_t rumble) {
   uint8_t rgb[3];
   assert(self);
