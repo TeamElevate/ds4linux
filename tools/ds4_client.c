@@ -67,7 +67,7 @@ int main() {
 
   while (keep_running) {
     controls = ds4_client_controls(client);
-    if (!controls) {
+    if (keep_running && !controls) {
       printf("ERROR: Could not obtain controls\n");
       return -1;
     }
