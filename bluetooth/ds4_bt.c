@@ -158,6 +158,10 @@ int ds4_bt_disconnect(ds4_bt_t* self) {
   return 0;
 }
 
+int ds4_bt_handle(ds4_bt_t* self) {
+  return self->int_socket;
+}
+
 int ds4_bt_peek(ds4_bt_t* self) {
   struct pollfd ufds[1];
   int ret;
