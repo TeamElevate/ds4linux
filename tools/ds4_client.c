@@ -27,7 +27,7 @@ void intHandler(int sig) {
 int main() {
   int len, rc;
   uint8_t cross;
-  ds4_controls_t* controls;
+  const ds4_controls_t* controls;
   ds4_client_t* client;
 
   struct sigaction sa;
@@ -58,18 +58,22 @@ int main() {
     return -1;
   }
 
+  if (!ds4_client_connected(client)) {
+    printf("No DS4 Connected\n");
+    return -1;
+  }
+
   keep_running = 1;
 
   while (keep_running) {
     controls = ds4_client_controls(client);
-    if (cross != controls->cross) {
+    if (!controls) {
+      printf("ERROR: Could not obtain controls\n");
+      return -1;
+    }
+    if (controls && cross != controls->cross) {
       cross = controls->cross;
       printf("Cross: %d\n", cross);
-    }
-    if (controls->cross) {
-      ds4_client_rgb(client, 0xFF, 0x00, 0x00);
-    } else {
-      ds4_client_rgb(client, 0x00, 0xFF, 0x00);
     }
   }
 
