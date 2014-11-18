@@ -71,7 +71,7 @@ int main() {
       printf("ERROR: Could not obtain controls\n");
       return -1;
     }
-    if (controls && cross != controls->cross) {
+    if (cross != controls->cross) {
       cross = controls->cross;
       printf("Cross: %d\n", cross);
     }
