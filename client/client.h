@@ -27,6 +27,7 @@ int ds4_client_connected(ds4_client_t* self);
 
 /**
  * Gets the latest ds4 controller data
+ * Returns null on error
  */
 const ds4_controls_t* ds4_client_controls(ds4_client_t* self);
 
