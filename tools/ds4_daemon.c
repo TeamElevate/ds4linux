@@ -146,14 +146,17 @@ int controller_connected_loop(ds4_t* ds4) {
       rc = ds4_read(ds4);
       if (rc == 0) {
         printf("DS4 Disconnected\n");
+        close(unix_fd);
         return -1;
       }
       if (rc < 0) {
         printf("ERROR: Error during bluetooth\n");
+        close(unix_fd);
         return -1;
       }
     }
   }
+  close(unix_fd);
 }
 
 int connect_to_ds4(ds4_t* ds4) {
