@@ -48,6 +48,12 @@ typedef ManualControlCommandDataPacked __attribute__((aligned(4))) ManualControl
 #define DS4_MAX (128 - DS4_CENTER_THRESHOLD)
 
 float calcThrottle(int stick) {
+  if (stick > 128)
+    return (stick - 128) / 128.0f;
+  else
+    return 0.0f;
+
+  /*
   static int last_stick[DS4_HOLD] = {0, 0, 0};
   static int throttle_offset = 0;
   static int proposed_offset_stick = 0;
@@ -101,7 +107,7 @@ float calcThrottle(int stick) {
     throttle = DS4_MAX;
   if (throttle < 0)
     throttle = 0;
-  return throttle / (float) DS4_MAX;
+  return throttle / (float) DS4_MAX;*/
 }
 
 // Returns num bytes in buffer
