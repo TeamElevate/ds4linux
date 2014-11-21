@@ -113,6 +113,7 @@ int controller_connected_loop(ds4_t* ds4) {
 
   if (bt_fd < 0) {
     printf("ERROR: Could not setup bt socket\n");
+    close(unix_fd);
     return bt_fd;
   }
 
@@ -125,6 +126,7 @@ int controller_connected_loop(ds4_t* ds4) {
     //POLL for 2 secs
     rc = poll(fds, 2, 2000);
     if (rc == -1) {
+      close(unix_fd);
       return rc;
     }
     if (rc == 0) {
