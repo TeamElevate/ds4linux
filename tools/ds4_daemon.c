@@ -208,5 +208,6 @@ int main() {
   }
 
   event_loop(ds4);
+  ds4_destroy(&ds4);
   return 1;
 }
