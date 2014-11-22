@@ -146,7 +146,6 @@ int main(int argc, char** argv) {
     }
     printf("Found I2C\n");
 
-    // @TODO: Set controller to green
     ds4_client_rgb(client, 0, 255, 0);
 
 
