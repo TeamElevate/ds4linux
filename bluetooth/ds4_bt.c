@@ -238,16 +238,3 @@ int set_bd_key(char* addr, uint8_t* key) {
   close(dd);
   return r;
 }
-
-int num_bd_key(char* addr) {
-  int dd;
-  int rc;
-
-  bdaddr_t bdaddr;
-  str2ba(addr, &bdaddr);
-
-  dd = open_bt();
-  rc = hci_read_stored_link_key(dd, &bdaddr, 0, 0);
-  close(dd);
-  return rc;
-}
