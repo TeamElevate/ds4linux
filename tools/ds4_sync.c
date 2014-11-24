@@ -33,16 +33,17 @@ uint8_t key[16] = {
 };
 
 int main(int argc, char** argv) {
-  int r;
+  int rc;
+  unsigned i;
   unsigned char ds4_addr[18];
   unsigned char host_addr[18];
   unsigned char* addr = NULL;
   ds4_usb_t ds4_usb;
+  uint8_t read_key[16];
 
-  r = ds4_usb_init(&ds4_usb);
-  if (r <= 0) {
+  rc = ds4_usb_init(&ds4_usb);
+  if (rc <= 0) {
     printf("No DS4 Controllers found\n");
-    return -1;
   }
 
   assert(ds4_usb.devh);
@@ -54,16 +55,30 @@ int main(int argc, char** argv) {
     addr = (unsigned char*)argv[1];
   } else {
     addr = host_addr;
-    get_bd_addr((char*)addr);
+    rc = get_bd_addr((char*)addr);
+    if (rc < 0) {
+      printf("Error: Unable to get MAC\n");
+      ds4_usb_deinit(&ds4_usb);
+      return -1;
+    }
   }
   printf("Host MAC: %s\n", addr);
   ds4_usb_set_mac(&ds4_usb, addr, key);
-  // Set key
-  set_bd_key((char*)ds4_addr, key);
   ds4_usb_get_mac(&ds4_usb, ds4_addr, host_addr);
   printf("New MAC: %s\n", host_addr);
-
   ds4_usb_deinit(&ds4_usb);
+
+  // Set key
+  rc = set_bd_key((char*)ds4_addr, key);
+  if (rc < 0) {
+    printf("Error: Unable to set link key\n");
+    return -1;
+  }
+  printf("Setting Key:");
+  for (i = 0; i < sizeof(key); i++) {
+    printf(" %2x", key[i]);
+  }
+  printf("\n");
 
   return 0;
 
