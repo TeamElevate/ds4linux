@@ -218,11 +218,10 @@ int get_bd_addr(char* addr) {
 
   bdaddr_t my_addr;
   r = hci_read_bd_addr(dd, &my_addr, 0);
-  assert(r == 0);
-  ba2str(&my_addr, addr);
 
+  ba2str(&my_addr, addr);
   close(dd);
-  return 0;
+  return r;
 }
 
 
@@ -236,6 +235,19 @@ int set_bd_key(char* addr, uint8_t* key) {
   str2ba(addr, &bdaddr);
 
   r = hci_write_stored_link_key(dd, &bdaddr, key, 0);
-  assert(r == 0);
-  return 0;
+  close(dd);
+  return r;
+}
+
+int num_bd_key(char* addr) {
+  int dd;
+  int rc;
+
+  bdaddr_t bdaddr;
+  str2ba(addr, &bdaddr);
+
+  dd = open_bt();
+  rc = hci_read_stored_link_key(dd, &bdaddr, 0, 0);
+  close(dd);
+  return rc;
 }
