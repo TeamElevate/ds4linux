@@ -84,6 +84,9 @@ int connection(ds4_t* ds4, int fd) {
     }
   }
 
+  shared_data.rumble = 0;
+  shared_data.send_data = 0;
+
   memcpy(&shared_data.controls, ds4_controls(ds4), sizeof(ds4_controls_t));
 
   rc = send(fd, &shared_data, sizeof(shared_data), MSG_NOSIGNAL);
