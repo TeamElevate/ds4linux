@@ -225,7 +225,7 @@ int get_bd_addr(char* addr) {
 }
 
 
-int set_bd_key(char* addr, uint8_t* key) {
+int set_bd_key(const char* addr, const uint8_t* key) {
   int dd;
   int r;
 

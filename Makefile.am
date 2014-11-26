@@ -3,7 +3,7 @@ if MRAA
 AM_CFLAGS += -Iuavtalk
 endif
 
-TOOLS = tools/ds4_conn tools/ds4_sync tools/ds4_daemon tools/ds4_client
+TOOLS = tools/ds4_conn tools/ds4_sync tools/ds4_daemon tools/ds4_client tools/ds4_link
 if MRAA
 TOOLS += tools/control tools/i2c_daemon
 endif
@@ -20,6 +20,9 @@ tools_ds4_daemon_SOURCES   = tools/ds4_daemon.c bluetooth/ds4_bt.c controller/ds
 tools_ds4_daemon_LDADD   = $(BLUEZ_LIBS)
 
 tools_ds4_client_SOURCES = tools/ds4_client.c controller/ds4.c bluetooth/ds4_bt.c client/client.c ipc/ds4_data.c
+
+tools_ds4_link_SOURCES = tools/ds4_link.c bluetooth/ds4_bt.c
+tools_ds4_link_LDADD   = $(BLUEZ_LIBS)
  
 if MRAA
 tools_control_SOURCES  = tools/control.c bluetooth/ds4_bt.c uavtalk/manualcontrol.c controller/ds4.c uavtalk/uavtalkheader.c
