@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  keep_running = 1;
   while (keep_running) {
     controls = ds4_client_controls(client);
     if (!controls) {
