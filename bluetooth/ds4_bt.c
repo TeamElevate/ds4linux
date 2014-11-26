@@ -238,3 +238,17 @@ int set_bd_key(const char* addr, const uint8_t* key) {
   close(dd);
   return r;
 }
+
+int del_bd_key(const char* addr) {
+  int dd;
+  int rc;
+
+  dd = open_bt();
+
+  bdaddr_t bdaddr;
+  str2ba(addr, &bdaddr);
+
+  rc = hci_delete_stored_link_key(dd, &bdaddr, 1, 0);
+  close(dd);
+  return rc;
+}
