@@ -10,7 +10,7 @@ endif
 
 bin_PROGRAMS = $(TOOLS)
 
-tools_ds4_conn_SOURCES = tools/ds4_conn.c bluetooth/ds4_bt.c controller/ds4.c
+tools_ds4_conn_SOURCES = tools/ds4_conn.c client/client.c
 tools_ds4_conn_LDADD   = $(BLUEZ_LIBS)
 
 tools_ds4_sync_SOURCES = tools/ds4_sync.c bluetooth/ds4_bt.c usb/ds4_usb.c
