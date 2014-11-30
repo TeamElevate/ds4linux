@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
   mraa_i2c_context i2c;
   ds4_client_t* client;
   int numerrs;
+  uint8_t r, g, b;
 
   struct sigaction sa;
   sa.sa_handler = intHandler;
@@ -73,6 +74,17 @@ int main(int argc, char** argv) {
   numerrs = 0;
 
   keep_running = 1;
+
+  FILE* fp = fopen("/opt/controller.color", "r");
+  if (!fp) {
+    printf("WARNING: No color specified. Defaulting to Green\n");
+    r = 0x0;
+    g = 0xFF;
+    b = 0x0;
+  } else {
+    fscanf(fp, "%d %d %d", &r, &g, &b);
+    fclose(fp);
+  }
 
 
   // Set Up SIG handler
@@ -146,7 +158,7 @@ int main(int argc, char** argv) {
     }
     printf("Found I2C\n");
 
-    ds4_client_rgb(client, 0, 255, 0);
+    ds4_client_rgb(client, r, g, b);
 
 
     gettimeofday(&start, NULL);
@@ -177,7 +189,7 @@ int main(int argc, char** argv) {
       }
       numerrs = 0;
 
-      ds4_client_rgb(client, 0x00, 0xFF, 0x00);
+      ds4_client_rgb(client, r, g, b);
     }
     mraa_i2c_stop(i2c);
     ds4_client_rgb(client, 0xFF, 0xFF, 0xFF);
