@@ -78,9 +78,9 @@ int connection(ds4_t* ds4, int fd) {
   }
 
   if (shared_data.send_data) {
-    ds4_set_rgb(ds4, shared_data.r, shared_data.g, shared_data.b);
+    ds4_queue_rgb(ds4, shared_data.r, shared_data.g, shared_data.b);
     if (shared_data.rumble) {
-      ds4_rumble(ds4);
+      ds4_queue_rumble(ds4);
     }
   }
 
@@ -127,7 +127,7 @@ int controller_connected_loop(ds4_t* ds4) {
 
   while (keep_running) {
     //POLL for 2 secs
-    rc = poll(fds, 2, 2000);
+    rc = poll(fds, 2, 10000);
     if (rc == -1) {
       close(unix_fd);
       return rc;
@@ -149,6 +149,17 @@ int controller_connected_loop(ds4_t* ds4) {
     if (fds[1].revents & POLLIN) {
       //read new controls
       rc = ds4_read(ds4);
+      if (rc == 0) {
+        printf("DS4 Disconnected\n");
+        close(unix_fd);
+        return -1;
+      }
+      if (rc < 0) {
+        printf("ERROR: Error during bluetooth\n");
+        close(unix_fd);
+        return -1;
+      }
+      rc = ds4_write(ds4);
       if (rc == 0) {
         printf("DS4 Disconnected\n");
         close(unix_fd);
