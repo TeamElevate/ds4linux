@@ -12,10 +12,13 @@ int ds4_scan(ds4_t* self);
 int ds4_connect(ds4_t* self);
 int ds4_disconnect(ds4_t* self);
 
+void ds4_queue_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b);
+void ds4_queue_rumble(ds4_t* self);
+int ds4_write(ds4_t* self);
+
 int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b);
 int ds4_rumble(ds4_t* self);
 
-int ds4_peek(ds4_t* self);
 int ds4_socket(ds4_t* self);
 int ds4_read(ds4_t* self);
 const ds4_controls_t* ds4_controls(const ds4_t* self);

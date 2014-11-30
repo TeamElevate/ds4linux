@@ -10,14 +10,16 @@ struct _ds4_t {
   uint8_t r;
   uint8_t g;
   uint8_t b;
+  uint8_t rumble;
 };
 
 ds4_t* ds4_new() {
   ds4_t* self = malloc(sizeof(ds4_t));
-  self->r  = 0xFF;
-  self->g  = 0xFF;
-  self->b  = 0xFF;
-  self->bt = 0x0;
+  self->r      = 0xFF;
+  self->g      = 0xFF;
+  self->b      = 0xFF;
+  self->bt     = 0x0;
+  self->rumble = 0x0;
   return self;
 }
 
@@ -93,19 +95,41 @@ static int ds4_set_state(ds4_t* self, uint8_t r, uint8_t g, uint8_t b, uint8_t r
   return ds4_bt_write(self->bt, rgb, rumble);
 }
 
+void ds4_queue_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b) {
+  assert(self);
+  self->r = r;
+  self->g = g;
+  self->b = b;
+}
+
+void ds4_queue_rumble(ds4_t* self) {
+  assert(self);
+  self->rumble = 0xFF;
+}
+
+int ds4_write(ds4_t* self) {
+  int rc;
+  uint8_t rgb[3];
+  assert(self);
+  if (!self->bt) return -1;
+  rgb[0] = self->r;
+  rgb[1] = self->g;
+  rgb[2] = self->b;
+  rc = ds4_bt_write(self->bt, rgb, self->rumble);
+  self->rumble = 0x0;
+  return rc;
+}
+
 int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b) {
   assert(self);
-  return ds4_set_state(self, r, g, b, 0);
+  ds4_queue_rgb(self, r, g, b);
+  return ds4_write(self);
 }
 
 int ds4_rumble(ds4_t* self) {
   assert(self);
-  return ds4_set_state(self, self->r, self->g, self->b, 0xFF);
-}
-
-int ds4_peek(ds4_t* self) {
-  if (!self->bt) return -1;
-  return ds4_bt_peek(self->bt);
+  ds4_queue_rumble(self);
+  return ds4_write(self);
 }
 
 int ds4_read(ds4_t* self) {
