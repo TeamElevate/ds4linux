@@ -165,8 +165,8 @@ int controller_connected_loop(ds4_t* ds4) {
 }
 
 int connect_to_ds4(ds4_t* ds4) {
-  int num_ds4_found;
-  int ds4_conn_status;
+  int num_ds4_found = -1;
+  int ds4_conn_status = -1;
 
   do {
     num_ds4_found = ds4_scan(ds4);
@@ -195,6 +195,7 @@ int event_loop(ds4_t* ds4) {
     // Scan until ds4 found
     while (keep_running && connect_to_ds4(ds4) == -1)
       ;
+    if (!keep_running) return 0;
 
     printf("DS4 Connected\n");
     controller_connected_loop(ds4);
