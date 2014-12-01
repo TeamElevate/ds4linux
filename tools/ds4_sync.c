@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
   rc = ds4_usb_init(&ds4_usb);
   if (rc <= 0) {
     printf("No DS4 Controllers found\n");
+    return -1;
   }
 
   assert(ds4_usb.devh);
