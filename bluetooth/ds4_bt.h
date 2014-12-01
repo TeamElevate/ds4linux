@@ -22,7 +22,7 @@ int ds4_bt_connected(const ds4_bt_t* self);
 // Gets the addr of the bluetooth chip
 // Len must be greater than 19
 int get_bd_addr(char* addr);
-int set_bd_key(const char* addr, const uint8_t* key);
+int set_bd_key(const char* addr, uint8_t* key);
 int del_bd_key(const char* addr);
 
 #endif
