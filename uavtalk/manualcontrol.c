@@ -133,19 +133,19 @@ uint16_t controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* 
   ManualControlCommandData* controls = (ManualControlCommandData *) (buf + headerSize);
 
   cruise_on ^= ds4->l1 == 1 && last_l1 == 0;
-  if (ds4->right_analog_y < 3) {
+  if (ds4->left_analog_y < 3) {
     cruise_on = 0;
   }
   if (ds4->share && ds4->options) {
     cruise_on = 0;
   }
 
-  float throttle = calcThrottle(ds4->right_analog_y, ds4->dpad, ds4->_unknown, cruise_on);
+  float throttle = calcThrottle(ds4->left_analog_y, ds4->dpad, ds4->_unknown, cruise_on);
   last_l1 = ds4->l1;
   controls->Throttle = throttle;
   controls->Thrust   = throttle;
-  controls->Roll     = (ds4->left_analog_x - 128.0f) / 128.0f;
-  controls->Pitch    = (ds4->left_analog_y - 128.0f) / 128.0f;
+  controls->Roll     = (ds4->right_analog_x - 128.0f) / 128.0f;
+  controls->Pitch    = (ds4->right_analog_y - 128.0f) / 128.0f;
   controls->Yaw      = (ds4->r2_analog - ds4->l2_analog) / 256.0f;
 
   controls->Collective = 0.0f;
