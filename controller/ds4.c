@@ -138,7 +138,7 @@ int ds4_read(ds4_t* self) {
   self->controls.left_analog_x = htobs(self->controls.left_analog_x);
   self->controls.left_analog_y = 255 - htobs(self->controls.left_analog_y);
   self->controls.right_analog_x = htobs(self->controls.right_analog_x);
-  self->controls.right_analog_y = 255 - htobs(self->controls.right_analog_y);
+  self->controls.right_analog_y = htobs(self->controls.right_analog_y);
   return ret;
 }
 
