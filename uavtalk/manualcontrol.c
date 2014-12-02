@@ -47,11 +47,25 @@ typedef ManualControlCommandDataPacked __attribute__((aligned(4))) ManualControl
 #define DS4_HOLD 3
 #define DS4_MAX (128 - DS4_CENTER_THRESHOLD)
 
-float calcThrottle(int stick) {
-  if (stick > 128)
-    return (stick - 128) / 128.0f;
-  else
-    return 0.0f;
+float calcThrottle(int stick, uint8_t dpad, uint8_t activated, uint8_t cruise_on) {
+  static float throttle = 0.0f;
+
+  if (cruise_on) {
+    if ((dpad == 0 || dpad == 1 || dpad == 7) && activated == 0) {
+      throttle += 0.01f;
+      if (throttle > 1.0f) throttle = 1.0f;
+    } else if ((dpad == 3 || dpad == 4 || dpad == 5) && activated == 0) {
+      throttle -= 0.01f;
+      if (throttle < 0.0f) throttle = 0.0f;
+    }
+  } else {
+    if (stick > 131.0f) {
+      throttle = (stick - 128.0f) / 128.0f;
+    } else {
+      throttle = 0.0f;
+    }
+  }
+  return throttle;
 
   /*
   static int last_stick[DS4_HOLD] = {0, 0, 0};
@@ -112,11 +126,22 @@ float calcThrottle(int stick) {
 
 // Returns num bytes in buffer
 uint16_t controller_data_to_control_command(const ds4_controls_t* ds4, uint8_t* buf) {
+  static uint8_t last_l1 = 0;
+  static uint8_t cruise_on = 0;
   int headerSize = makeUAVTalkHeader(buf, UAVTALK_MESSAGE_TYPE_OBJ, MANUALCONTROLCOMMAND_OBJID, sizeof(ManualControlCommandData));
 
   ManualControlCommandData* controls = (ManualControlCommandData *) (buf + headerSize);
 
-  float throttle = calcThrottle(ds4->right_analog_y);
+  cruise_on ^= ds4->l1 == 1 && last_l1 == 0;
+  if (ds4->right_analog_y < 3) {
+    cruise_on = 0;
+  }
+  if (ds4->share && ds4->options) {
+    cruise_on = 0;
+  }
+
+  float throttle = calcThrottle(ds4->right_analog_y, ds4->dpad, ds4->_unknown, cruise_on);
+  last_l1 = ds4->l1;
   controls->Throttle = throttle;
   controls->Thrust   = throttle;
   controls->Roll     = (ds4->left_analog_x - 128.0f) / 128.0f;
