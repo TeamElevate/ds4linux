@@ -8,6 +8,7 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/time.h>
 
 #include <ds4_usb.h>
 #include <ds4_bt.h>
@@ -94,7 +95,7 @@ int connection(ds4_t* ds4, int fd) {
   if (rc != sizeof(shared_data)) {
     return -1;
   }
-  
+
   return 0;
 }
 
@@ -104,6 +105,8 @@ int controller_connected_loop(ds4_t* ds4) {
   struct sockaddr_un remote;
   int t;
   int rc;
+  struct timeval curtime;
+  struct timeval last_ds4;
 
   unix_fd = setup_unix_socket();
 
@@ -137,12 +140,20 @@ int controller_connected_loop(ds4_t* ds4) {
     }
     // If hit on unix socket
     if (fds[0].revents & POLLIN) {
-      // accept the connection and spin off thread
-      int client = accept(unix_fd, (struct sockaddr*)&remote, &t);
-      // might want to put this in its own thread
-      rc = connection(ds4, client);
-      if (rc != 0) {
-        printf("ERROR: Error during connection\n");
+      gettimeofday(&curtime, NULL);
+      int msec = ((curtime.tv_sec - last_ds4.tv_sec) * 1000 + (curtime.tv_usec - last_ds4.tv_usec) / 1000);
+      if (msec > 1000) {
+        printf("Control packet requested with stale ds4 data: %d ms old\n", msec);
+        //close(unix_fd);
+        //return -1;
+      } else {
+        // accept the connection and spin off thread
+        int client = accept(unix_fd, (struct sockaddr*)&remote, &t);
+        // might want to put this in its own thread
+        rc = connection(ds4, client);
+        if (rc != 0) {
+          printf("ERROR: Error during connection\n");
+        }
       }
     }
 
@@ -170,6 +181,7 @@ int controller_connected_loop(ds4_t* ds4) {
         close(unix_fd);
         return -1;
       }
+      gettimeofday(&last_ds4, NULL);
     }
   }
   close(unix_fd);
