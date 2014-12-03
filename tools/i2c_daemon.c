@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
     gettimeofday(&start, NULL);
     while (keep_running) {
       controls = ds4_client_controls(client);
-      if (!controls) {
+      if (!controls || !ds4_client_connected(client)) {
         // Bad Controller
         printf("DS4 Disconnected\n");
         numerrs++;
