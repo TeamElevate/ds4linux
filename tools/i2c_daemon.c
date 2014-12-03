@@ -189,7 +189,6 @@ int main(int argc, char** argv) {
       }
       numerrs = 0;
 
-      ds4_client_rgb(client, r, g, b);
     }
     mraa_i2c_stop(i2c);
     ds4_client_rgb(client, 0xFF, 0xFF, 0xFF);
