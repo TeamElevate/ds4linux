@@ -74,13 +74,13 @@ int main(int argc, char** argv) {
   numerrs = 0;
 
   keep_running = 1;
+  r = 0x0;
+  g = 0xFF;
+  b = 0x0;
 
   FILE* fp = fopen("/opt/controller.color", "r");
   if (!fp) {
     printf("WARNING: No color specified. Defaulting to Green\n");
-    r = 0x0;
-    g = 0xFF;
-    b = 0x0;
   } else {
     fscanf(fp, "%d %d %d", &r, &g, &b);
     fclose(fp);
