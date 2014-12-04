@@ -134,11 +134,11 @@ int ds4_read(ds4_t* self) {
   ret = ds4_bt_read(self->bt, buffer, sizeof(buffer));
   if (ret == sizeof(buffer)) {
     memcpy(&self->controls, buffer + 4, sizeof(ds4_controls_t));
+    self->controls.left_analog_x = htobs(self->controls.left_analog_x);
+    self->controls.left_analog_y = 255 - htobs(self->controls.left_analog_y);
+    self->controls.right_analog_x = htobs(self->controls.right_analog_x);
+    self->controls.right_analog_y = htobs(self->controls.right_analog_y);
   }
-  self->controls.left_analog_x = htobs(self->controls.left_analog_x);
-  self->controls.left_analog_y = 255 - htobs(self->controls.left_analog_y);
-  self->controls.right_analog_x = htobs(self->controls.right_analog_x);
-  self->controls.right_analog_y = htobs(self->controls.right_analog_y);
   return ret;
 }
 
