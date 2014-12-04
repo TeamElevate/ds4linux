@@ -84,7 +84,9 @@ int connection(ds4_t* ds4, int fd) {
   }
 
   if (shared_data.send_data) {
-    ds4_queue_rgb(ds4, shared_data.r, shared_data.g, shared_data.b);
+    if (shared_data.r + shared_data.g + shared_data.b != 0) {
+      ds4_queue_rgb(ds4, shared_data.r, shared_data.g, shared_data.b);
+    }
     if (shared_data.rumble) {
       ds4_queue_rumble(ds4);
     }
