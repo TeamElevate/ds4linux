@@ -126,12 +126,13 @@ int controller_connected_loop(ds4_t* ds4) {
   fds[0].fd = unix_fd;
   fds[0].events = POLLIN;
   fds[1].fd = bt_fd;
-  fds[1].events = POLLIN;
+  fds[1].events = POLLIN | POLLHUP | POLLERR;
 
   while (keep_running) {
     //POLL for 2 secs
-    rc = poll(fds, 2, 10000);
+    rc = poll(fds, 2, 200);
     if (rc == -1) {
+      printf("ERROR: poll failed\n");
       close(unix_fd);
       return rc;
     }
@@ -182,6 +183,11 @@ int controller_connected_loop(ds4_t* ds4) {
         return -1;
       }
       gettimeofday(&last_ds4, NULL);
+    } 
+    if (fds[1].revents & POLLHUP || fds[1].revents & POLLERR) {
+      printf("ERROR: DS4 disconnected\n");
+      close(unix_fd);
+      return -1;
     }
   }
   close(unix_fd);
