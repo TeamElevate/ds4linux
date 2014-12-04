@@ -73,7 +73,12 @@ int connection(ds4_t* ds4, int fd) {
   ds4_shared_data_t shared_data;
 
   rc = recv(fd, &shared_data, sizeof(shared_data), 0);
+  if (rc == 0) {
+    close(fd);
+    return;
+  }
   if (rc != sizeof(shared_data)) {
+    printf("ERROR: Unix Socket Only Recv %d bytes\n", rc); 
     close(fd);
     return -1;
   }
@@ -93,6 +98,7 @@ int connection(ds4_t* ds4, int fd) {
   rc = send(fd, &shared_data, sizeof(shared_data), MSG_NOSIGNAL);
   close(fd);
   if (rc != sizeof(shared_data)) {
+    printf("ERROR: Unix Socket Only Sent %d bytes\n", rc); 
     return -1;
   }
 
@@ -130,7 +136,7 @@ int controller_connected_loop(ds4_t* ds4) {
 
   while (keep_running) {
     //POLL for 2 secs
-    rc = poll(fds, 2, 200);
+    rc = poll(fds, 2, 2000);
     if (rc == -1) {
       printf("ERROR: poll failed\n");
       close(unix_fd);
@@ -152,9 +158,6 @@ int controller_connected_loop(ds4_t* ds4) {
         int client = accept(unix_fd, (struct sockaddr*)&remote, &t);
         // might want to put this in its own thread
         rc = connection(ds4, client);
-        if (rc != 0) {
-          printf("ERROR: Error during connection\n");
-        }
       }
     }
     
