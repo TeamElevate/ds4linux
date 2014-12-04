@@ -143,7 +143,7 @@ int controller_connected_loop(ds4_t* ds4) {
       gettimeofday(&curtime, NULL);
       int msec = ((curtime.tv_sec - last_ds4.tv_sec) * 1000 + (curtime.tv_usec - last_ds4.tv_usec) / 1000);
       if (msec > 1000) {
-        printf("Control packet requested with stale ds4 data: %d ms old\n", msec);
+        //printf("Control packet requested with stale ds4 data: %d ms old\n", msec);
         //close(unix_fd);
         //return -1;
       } else {
@@ -156,28 +156,28 @@ int controller_connected_loop(ds4_t* ds4) {
         }
       }
     }
-
+    
     if (fds[1].revents & POLLIN) {
       //read new controls
       rc = ds4_read(ds4);
       if (rc == 0) {
-        printf("DS4 Disconnected\n");
+        printf("ERROR: DS4 Disconnected during read\n");
         close(unix_fd);
         return -1;
       }
       if (rc < 0) {
-        printf("ERROR: Error during bluetooth\n");
+        printf("ERROR: Error during read\n");
         close(unix_fd);
         return -1;
       }
       rc = ds4_write(ds4);
       if (rc == 0) {
-        printf("DS4 Disconnected\n");
+        printf("ERROR: DS4 Disconnected during write\n");
         close(unix_fd);
         return -1;
       }
       if (rc < 0) {
-        printf("ERROR: Error during bluetooth\n");
+        printf("ERROR: Error during write\n");
         close(unix_fd);
         return -1;
       }
