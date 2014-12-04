@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
   while (keep_running) {
     controls = ds4_client_controls(client);
     if (!controls) {
-      printf("ERROR Reading\n");
+      printf("Disconnected\n");
       return -1;
     }
     ds4_client_rgb(client, controls->left_analog_y, controls->left_analog_x, controls->right_analog_y);
