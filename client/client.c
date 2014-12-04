@@ -93,6 +93,9 @@ static int ds4_client_update(ds4_client_t* self) {
   }
 
   rc = recv(self->sock, &self->shared_data, sizeof(ds4_shared_data_t), 0);
+  self->shared_data.r = 0;
+  self->shared_data.g = 0;
+  self->shared_data.b = 0;
 
   if (rc != sizeof(ds4_shared_data_t)) {
     close(self->sock);
