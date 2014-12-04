@@ -103,6 +103,34 @@ int ds4_bt_scan(ds4_bt_t* self) {
   return num_found;
 }
 
+int set_timeout(int sock, int timeout) {
+  int err = 0, dd;
+  struct hci_conn_info_req *cr = 0;
+  struct hci_request rq = { 0 };
+  struct l2cap_conninfo l2capConnInfo;
+  socklen_t l2capConnInfoLen;
+
+  struct {
+    uint16_t handle;
+    uint16_t flush_timeout;
+  } cmd_param;
+
+  struct {
+    uint8_t  status;
+    uint16_t handle;
+  } cmd_response;
+
+  // find the connection handle to the specified bluetooth device
+  l2capConnInfoLen = sizeof(l2capConnInfo);
+  getsockopt(sock, SOL_L2CAP, L2CAP_CONNINFO, &l2capConnInfo, &l2capConnInfoLen);
+
+  dd = open_bt();
+  err = hci_write_link_supervision_timeout(dd, l2capConnInfo.hci_handle, timeout, 0);
+
+  if( dd >= 0 ) close(dd);
+  return err;
+}
+
 int ds4_bt_connect(ds4_bt_t* self) {
   int ret;
   char* data;
@@ -141,6 +169,14 @@ int ds4_bt_connect(ds4_bt_t* self) {
   if (ret != 0) {
     ds4_bt_disconnect(self);
     printf("Error in creating int socket: %s\n", strerror(errno));
+    return ret;
+  }
+  
+  // Set timeout of 2 seconds
+  ret = set_timeout(self->int_socket, 1600);
+  if (ret != 0) {
+    ds4_bt_disconnect(self);
+    printf("Error in setting timeout: %s\n", strerror(errno));
     return ret;
   }
 
