@@ -12,11 +12,24 @@ struct _ds4_usb {
 
 typedef struct _ds4_usb ds4_usb_t;
 
-// Search for DS4 Controller over USB
-// Returns number found
-// @TODO: Deal with more than one
+/**
+ * Searches for DS4s on USB. Returns number found.
+ * Places the first one in the param
+ */
 int ds4_usb_init(ds4_usb_t*);
+
+/**
+ * Close the DS4 controller
+ */
 int ds4_usb_deinit(ds4_usb_t*);
+
+/**
+ * Set the MAC address for the DS4 to connect on regular pairing mode
+ */
 int ds4_usb_set_mac(ds4_usb_t*, const unsigned char*, const uint8_t*);
+
+/**
+ * Get the MAC address the DS4 will connect to on regular pairing mode
+ */
 int ds4_usb_get_mac(ds4_usb_t*, unsigned char*, unsigned char*);
 #endif
