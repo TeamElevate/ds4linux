@@ -5,26 +5,77 @@
 typedef struct _ds4_t ds4_t;
 typedef struct _ds4_controls_t ds4_controls_t;
 
+/**
+ * Create a new DS4 object
+ */
 ds4_t* ds4_new();
+
+/**
+ * Destroy a DS4 object. Close connections if they are open
+ */
 void ds4_destroy(ds4_t** self_p);
 
+/**
+ * Scan for a DS4 controller
+ */
 int ds4_scan(ds4_t* self);
+
+/**
+ * Connect to a DS4 controller
+ * Must wait until ds4_scan returns
+ */
 int ds4_connect(ds4_t* self);
+
+/**
+ * Disconnect from DS4
+ */
 int ds4_disconnect(ds4_t* self);
 
+/**
+ * Queue up a change to the RGB led
+ * Will be written on next ds4_write call
+ */
 void ds4_queue_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * Queue up a rumble
+ * Will be written on next ds4_write call
+ */
 void ds4_queue_rumble(ds4_t* self);
+
+/**
+ * Write latest queued RGB and rumble
+ * Resets rumble until rumble is called again
+ */
 int ds4_write(ds4_t* self);
 
+/**
+ * Queue and write the LED rgb in the same command
+ */
 int ds4_set_rgb(ds4_t* self, uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * Queue and write the controller rumble in the same command
+ */
 int ds4_rumble(ds4_t* self);
 
+/**
+ * Returns latest read socket for DS4 or -1 if not connected
+ */
 int ds4_socket(ds4_t* self);
+
+/**
+ * Read the latest data from the controller
+ */
 int ds4_read(ds4_t* self);
+
+/**
+ * Get the last valid controller data
+ */
 const ds4_controls_t* ds4_controls(const ds4_t* self);
 
 
-// All the controller data
+// Layout of controller data
 struct _ds4_controls_t {
   // byte 0
   unsigned left_analog_x  : 8;
